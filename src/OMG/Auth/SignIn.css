@@ -1,0 +1,93 @@
+.signin-container {
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Signin form styles */
+
+.signin-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Header styles */
+
+.header {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Input field styles */
+
+.input-field {
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 100%;
+  height: 40px;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.input:focus {
+  border-color: #aaa;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Button field styles */
+
+.button-field {
+  margin-top: 20px;
+}
+
+.btn {
+  width: 100%;
+  height: 40px;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #3e8e41;
+}
+
+/* Login link styles */
+
+.login-link {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.text {
+  font-size: 16px;
+  color: #666;
+}
+
+.link {
+  text-decoration: none;
+  color: #337ab7;
+}
+
+.link:hover {
+  color: #23527c;
+}

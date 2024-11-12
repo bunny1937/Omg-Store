@@ -1,0 +1,137 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
+
+.banner {
+  max-width: 100%;
+  height: 100vh;
+  font-size: 62.5%;
+  line-height: 1.25;
+
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  position: relative;
+  background-image: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
+}
+
+.banner p,
+.banner span {
+  font-size: 1.4rem;
+}
+
+.banner a {
+  font-weight: 600;
+}
+
+.banner .banner-row {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.living-txt {
+  font-size: 40px;
+}
+.banner .banner-row.center {
+  margin-left: 21em;
+}
+.banner .banner-row.center .row-letter {
+  left: 0;
+}
+.banner .banner-row.right {
+  justify-content: flex-end;
+}
+.banner .banner-row .row-title,
+.banner .banner-row .row-letter {
+  font-size: 8rem;
+  font-weight: 500;
+  position: relative;
+  letter-spacing: -0.8rem;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Scroll Element */
+.banner .banner-row .scroll {
+  left: 10%; /* Adjust as needed */
+}
+
+.banner .banner-row .row-col {
+  width: 90%;
+  padding: 0 30px;
+}
+
+.row-message {
+  font-size: 70px !important;
+  width: auto;
+}
+.banner .banner-row .row-col .row-message {
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 2.6rem;
+  width: 320px;
+}
+.banner .banner-row .scroll {
+  height: 160px;
+  width: 160px;
+  border-radius: 100%;
+  background: #fff;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  left: 160px;
+}
+
+.banner .banner-row .scroll span {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 4px 0;
+}
+/* ... (previous styles) ... */
+
+/* Responsive Margin for .banner .banner-row.center */
+@media (max-width: 768px) {
+  .banner .banner-row.center {
+    margin-left: 40%; /* Adjust as needed */
+  }
+}
+@media (max-width: 665px) and (min-width: 100px) {
+  .banner .banner-row.center {
+    margin-left: 10%; /* Adjust as needed */
+  }
+}
+@media (max-width: 1140px) and (min-width: 768px) {
+  .banner .banner-row .row-col {
+    width: 50%;
+    padding: 0 15px; /* Adjust as needed */
+  }
+}
+/* Responsive Padding for .banner .banner-row .row-col */
+@media (max-width: 1440px) {
+  .banner .banner-row .row-col {
+    width: 70%;
+    padding: 0 15px; /* Adjust as needed */
+  }
+}
+
+/* Responsive Sizes for Scroll Element */
+.banner .banner-row .scroll {
+  height: 10vw; /* Adjust as needed */
+  width: 10vw; /* Adjust as needed */
+  left: 5%; /* Adjust as needed */
+}
+@media (max-width: 1200px) {
+  .banner .banner-row .row-title,
+  .banner .banner-row .row-letter {
+    font-size: 12rem; /* Adjust as needed */
+  }
+}
+
+@media (max-width: 768px) {
+  .banner .banner-row .row-title,
+  .banner .banner-row .row-letter {
+    font-size: 9rem; /* Adjust as needed */
+    line-height: 1.2; /* Adjust line height as needed */
+    margin-bottom: 0; /* Adjust margin as needed */
+    padding-bottom: 0; /* Adjust padding as needed */
+  }
+}

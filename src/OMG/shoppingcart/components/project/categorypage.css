@@ -1,0 +1,28 @@
+.categoryproject {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 50px 50px;
+  transition: all 0.2s;
+}
+
+.categoryproject:hover {
+  opacity: 0.5;
+}
+
+.categoryproject:hover h2 {
+  transform: translateX(-10px);
+}
+
+.categoryproject:hover p {
+  transform: translateX(10px);
+}
+
+.categoryproject h2 {
+  font-size: 60px;
+  margin: 0px;
+  font-weight: 400;
+  transition: all 0.4s;
+}

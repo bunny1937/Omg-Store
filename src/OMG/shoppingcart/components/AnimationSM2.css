@@ -1,0 +1,116 @@
+/* add some basic styling
+
+.spacer {
+  min-height: 50vh;
+}
+
+.s0 {
+  background-color: #f7f7f7;
+}
+
+.s1 {
+  background-color: #337ab7;
+}
+
+.s2 {
+  background-color: #5cb85c;
+}
+
+.s3 {
+  background-color: #5bc0de;
+}
+
+.s4 {
+  background-color: #f0ad4e;
+}
+
+.s5 {
+  background-color: #d9534f;
+}
+
+.animate4 {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 20px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  line-height: 100px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.box2 {
+  width: 100px;
+  height: 100px;
+  background-color: #333;
+}
+
+.black {
+  background-color: #000;
+}
+
+.outline {
+  border: 1px solid #fff;
+}
+
+.viewsource {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: 10px;
+  background-color: #337ab7;
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.viewsource:hover {
+  background-color: #23527c;
+} */
+/* AnimatedBoxes.css */
+
+.spacer {
+  height: 100vh; /* Adjust as needed */
+}
+
+.s1 {
+  background-color: #f0f0f0; /* Example styling */
+}
+
+.s0 {
+  background-color: #e0e0e0;
+}
+
+.s2 {
+  background-color: #d0d0d0;
+}
+
+.animate4 {
+  position: relative; /* Allows gsap to use transform for animation */
+  width: 100px; /* Example size */
+  height: 100px;
+  margin: 20px auto;
+  background-color: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.black {
+  background-color: black;
+}
+
+.outline {
+  border: 2px solid #fff;
+}
+
+.viewsource {
+  color: #00f;
+  text-decoration: underline;
+  margin-top: 10px;
+  display: block;
+}
