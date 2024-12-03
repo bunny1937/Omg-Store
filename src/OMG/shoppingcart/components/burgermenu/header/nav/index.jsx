@@ -25,7 +25,7 @@ const navItems = [
   },
 ];
 
-export default function Index() {
+export default function Burger() {
   const [selectedIndicator, setSelectedIndicator] = useState();
 
   return (

@@ -1,34 +1,32 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import cartContext from "../context/cartContext";
-import Magnetic from "./Magnetic";
 import "./Navbar.css";
 import { FavouritesContext } from "./FavoritesContext";
 import UserContext from "../../Auth/UserContext";
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "../../db/Firebase";
-import AniComponent1 from "./AniComponent1";
+import logoblack from "./pages/photos/OMGstore.svg";
 const Header = () => {
   const { user, isAdmin, setUser } = useContext(UserContext); // User context
-  const { cartItems, toggleCart, state, dispatch } = useContext(cartContext); // Cart context
+  const { cartItems, dispatch } = useContext(cartContext); // Cart context
   const { favouriteItems } = useContext(FavouritesContext); // Favourites context
   const cartQuantity = cartItems ? cartItems.length : 0;
-
   const [click, setClick] = useState(false);
   const [favouriteQuantity, setFavouriteQuantity] = useState(0);
-
   const [dropdown, setDropdown] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [showResults, setShowResults] = useState(false);
-  const navigate = useNavigate();
   const searchContainerRef = useRef(null);
+  const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState([]); // Dynamic categories
 
-  // const [isComponent1Open, setComponent1Open] = useState(false);
-
-  // const handleIconClick = () => setComponent1Open(true);
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
 
   const logout = () => {
     localStorage.clear();
@@ -68,6 +66,26 @@ const Header = () => {
     setFilteredProducts(filteredProducts);
     setShowResults(true);
   };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "Products"));
+        const categorySet = new Set();
+        querySnapshot.forEach((doc) => {
+          const { Category } = doc.data();
+          if (Category) {
+            categorySet.add(Category); // Add category to set to avoid duplicates
+          }
+        });
+        setCategories([...categorySet]); // Convert set to array for rendering
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+  const topCategories = ["Tshirts", "Hoodies", "Oversize"]; // Adjust as needed
+  const bottomCategories = ["Pants", "Jeans"]; // Adjust as needed
 
   useEffect(() => {
     if (favouriteItems) {
@@ -109,89 +127,138 @@ const Header = () => {
         )} */}
         <div className="header-links">
           <Link to={"/"} className="navbar-logo" onClick={closeMobileMenu}>
-            OMG
+            <img src={logoblack} alt="hehe" />
           </Link>
         </div>
 
         <div className="menu-icon" onClick={handleClick}>
-          <i className={click ? "fas fa-times" : "fas fa-bars"} />
+          <span style={{ color: "white" }}>
+            <i className={click ? "fas fa-times" : "fas fa-bars"} />
+          </span>
         </div>
-        <ul className={click ? "nav-menu active" : "nav-menu"}>
-          <div
-            className="header-container"
-            onMouseEnter={() => setShowDialog(true)}
-            onMouseLeave={() => setShowDialog(false)}
-          >
-            <p className="product-hover">Products</p>
-
-            {showDialog && (
-              <div className="product-dialog">
-                <Link to={"/Home"} className="nav-links">
-                  <p>All Products</p>
-                </Link>
-                <div className="product-category">
-                  <h3>Top</h3>
-                  <ul>
-                    <Link to={`/pages/Oversize`}>
-                      <li>Oversize</li>
-                    </Link>
-                    <Link to={`/pages/Tshirt/`}>
-                      <li>T-Shirts</li>
-                    </Link>
-                    <Link to={`pages/Shirt`}>
-                      <li>Shirts</li>
-                    </Link>
-                  </ul>
-                </div>
-                <div className="product-category">
-                  <h3>Bottom</h3>
-                  <ul>
-                    <Link to={`pages/Pants`}>
-                      <li>Pants</li>
-                    </Link>
-                    <Link to={`pages/Jeans`}>
-                      <li>Jeans</li>
-                    </Link>
-                  </ul>
-                </div>
+        <span style={{ color: "white" }}>
+          <ul className={click ? "nav-menu active" : "nav-menu"}>
+            {/* Dropdown for Collections */}
+            <div className="dropdown-wrapper">
+              <div
+                className="dropdown-trigger"
+                onMouseEnter={() => setIsDropdownOpen(true)}
+                onMouseLeave={() => setIsDropdownOpen(false)}
+              >
+                <p className="hover-text">Collections</p>
+                <div className="underline"></div>
               </div>
-            )}
-          </div>
-          <div className="header-links">
-            <Link to={"/Contact"} className="nav-links">
-              Contact
-            </Link>
-          </div>
-        </ul>
-        <div className="header-links search-container" ref={searchContainerRef}>
-          <input
-            type="text"
-            className="nav-links search-input"
-            placeholder="Find Product..."
-            value={searchQuery}
-            onChange={handleSearch}
-          />
-          <div className="search-icon" />
-          {searchQuery && showResults && filteredProducts.length > 0 && (
-            <div className="search-results">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  onClick={() => handleSearchResultClick(product.id)}
-                  className="search-result-item"
-                >
-                  <div className="product-details-container">
-                    <div className="product-info">
-                      <h2>{product.Name}</h2>
-                    </div>
+
+              {isDropdownOpen && (
+                <div className="dropdown-content">
+                  {/* Top Categories */}
+                  <div className="dropdown-submenu">
+                    <h4 className="submenu-title">Top</h4>
+                    <ul>
+                      {categories
+                        .filter((category) => topCategories.includes(category))
+                        .map((category) => (
+                          <li key={category}>
+                            <Link
+                              to={`/category/${category}`}
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              {category}
+                            </Link>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+
+                  {/* Bottom Categories */}
+                  <div className="dropdown-submenu">
+                    <h4 className="submenu-title">Bottom</h4>
+                    <ul>
+                      {categories
+                        .filter((category) =>
+                          bottomCategories.includes(category)
+                        )
+                        .map((category) => (
+                          <li key={category}>
+                            <Link
+                              to={`/category/${category}`}
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              {category}
+                            </Link>
+                          </li>
+                        ))}
+                    </ul>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-          )}
-          {searchQuery && showResults && filteredProducts.length === 0 && (
-            <p className="no-results">No products found</p>
-          )}
+
+            <div className="header-links">
+              <Link to={"/Home"} className="all-products">
+                <p>All Products</p>
+              </Link>
+            </div>
+            <div className="header-links">
+              <Link to={"/Contact"} className="navbar-links">
+                <p> Contact</p>
+              </Link>
+            </div>
+            <div className="header-links">
+              <Link to={"/Favourites"}>
+                <div className="fav-icon">
+                  {favouriteQuantity >= 1 && (
+                    <span className="badge">{favouriteQuantity}</span>
+                  )}
+                </div>
+                <p className="favourites-text">Favourites</p>
+              </Link>
+            </div>
+            {/* <>
+            <button onClick={() => setShowComponent1(true)}>Component1</button>
+            {showComponent1 && (
+              <AniComponent1 onClose={() => setShowComponent1(false)} />
+            )}
+          </> */}
+          </ul>
+        </span>
+        <div className="search-join">
+          <div
+            className="header-links search-container"
+            ref={searchContainerRef}
+          >
+            <i
+              className="fa-solid fa-magnifying-glass search-icon"
+              style={{ color: "#000000" }}
+            ></i>
+            <input
+              type="text"
+              className="nav-links search-input"
+              placeholder="Find Product..."
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+            {searchQuery && showResults && filteredProducts.length > 0 && (
+              <div className="search-results">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    onClick={() => handleSearchResultClick(product.id)}
+                    className="search-result-item"
+                  >
+                    <div className="product-details-container">
+                      <div className="product-info">
+                        <h2>{product.Name}</h2>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {searchQuery && showResults && filteredProducts.length === 0 && (
+              <p className="no-results">No products found</p>
+            )}
+          </div>
         </div>
         <div className="header-links user-container">
           <div onClick={handleDropdown} className="user-icon">
@@ -220,15 +287,6 @@ const Header = () => {
           )}
         </div>
 
-        <div className="header-links">
-          <Link to={"/Favourites"}>
-            <div className="fav-icon">
-              {favouriteQuantity >= 1 && (
-                <span className="badge">{favouriteQuantity}</span>
-              )}
-            </div>
-          </Link>
-        </div>
         <div className="header-links">
           <div title="Cart" className="cart_icon" onClick={handleToggleCart}>
             <div className="bag-icon" alt="bag-icon" />

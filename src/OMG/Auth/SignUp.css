@@ -17,7 +17,9 @@
 }
 
 /* Header styles */
-
+.logo {
+  background-image: url(../shoppingcart/components/pages/photos/OMGstore.svg);
+}
 .header {
   margin-bottom: 20px;
 }

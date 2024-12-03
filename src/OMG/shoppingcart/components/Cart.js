@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef } from "react";
+import { gsap } from "gsap";
 import { Link } from "react-router-dom";
 import cartContext from "../context/cartContext";
 import { collection, getDocs } from "firebase/firestore";
@@ -17,9 +18,17 @@ const Cart = () => {
     state,
     dispatch,
   } = useContext(cartContext);
+  const cartRef = useRef(null);
 
   // Fetch cart items when user is authenticated
-
+  useEffect(() => {
+    // Animation for when the cart appears
+    gsap.fromTo(
+      cartRef.current,
+      { scale: 0.8, opacity: 0 },
+      { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" }
+    );
+  }, []);
   // Function to fetch cart items
   useEffect(() => {
     const fetchCartItems = async (userId) => {
@@ -81,7 +90,7 @@ const Cart = () => {
   return (
     <>
       {isCartOpen && (
-        <div id="cart">
+        <div id="cart" ref={cartRef}>
           <div className="cart_content">
             <div className="cart_head">
               <h2>

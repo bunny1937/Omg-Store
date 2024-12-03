@@ -1,6 +1,8 @@
 // App.js
 import "./App.css";
 import React, { useState } from "react";
+import { ReactLenis, useLenis } from "lenis/react";
+
 import Header from "./OMG/shoppingcart/components/Header";
 import Home from "./OMG/shoppingcart/pages/Home";
 import Heroui from "./OMG/Hero/Heroui";
@@ -9,8 +11,6 @@ import Details from "./OMG/shoppingcart/components/details";
 import Favourites from "./OMG/shoppingcart/components/Favourites";
 import { CartProvider } from "./OMG/shoppingcart/context/cartContext";
 import { FavouritesProvider } from "./OMG/shoppingcart/components/FavoritesContext";
-import Tshirt from "./OMG/shoppingcart/components/pages/Tshirt";
-import Shirt from "./OMG/shoppingcart/components/pages/Shirt";
 import Signup from "./OMG/Auth/SignUp";
 import SignIn from "./OMG/Auth/SignIn";
 import { Route, Routes } from "react-router-dom";
@@ -20,49 +20,54 @@ import { ProtectedRoute } from "./OMG/shoppingcart/components/protectRoute/Prote
 import AdminDash from "./OMG/Auth/AdminDash";
 import { useLocation } from "react-router-dom";
 import { UserProvider } from "./OMG/Auth/UserContext";
-import OverSize from "./OMG/shoppingcart/components/pages/OverSize";
-import Jeans from "./OMG/shoppingcart/components/pages/Jeans";
-import Pants from "./OMG/shoppingcart/components/pages/Pants";
 import Checkout from "./OMG/shoppingcart/components/Checkout";
-
+import Payment from "./OMG/shoppingcart/components/Payment";
+import Category from "./OMG/Hero/Category/Category";
+import CategoryPage from "./OMG/Hero/Category/Categorypage";
 function App() {
+  const lenis = useLenis(({ scroll }) => {
+    // called every scroll
+  });
   return (
-    <React.StrictMode>
-      <UserProvider>
-        <ParallaxProvider>
-          <FavouritesProvider>
-            <CartProvider>
-              <Header />
-              <Routes>
-                <Route path="/" element={<Heroui />} />
-                <Route path="/SignUp" element={<Signup />} />
-                <Route path="/SignIn" element={<SignIn />} />
-                <Route path="/Home" element={<Home />} />
-                <Route path="/Details/:id" element={<Details />} />
-                <Route path="/Favourites" element={<Favourites />} />
-                <Route path="/pages/Tshirt" element={<Tshirt />} />
-                <Route path="/pages/Shirt" element={<Shirt />} />
-                <Route path="/pages/Oversize" element={<OverSize />} />
-                <Route path="/pages/Pants" element={<Pants />} />
-                <Route path="/pages/Jeans" element={<Jeans />} />
-                <Route path="/Cart" element={<Cart />} />
-                <Route path="/Checkout" element={<Checkout />} />
-                <Route path="/AdminDash" element={<AdminDash />} />
-                {/* Protected Route for Admin */}
-                <Route
-                  path="/AdminDash"
-                  element={
-                    <ProtectedRoute adminOnly={true}>
-                      <AdminDash />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </CartProvider>
-          </FavouritesProvider>
-        </ParallaxProvider>
-      </UserProvider>
-    </React.StrictMode>
+    <ReactLenis root>
+      <React.StrictMode>
+        <UserProvider>
+          <ParallaxProvider>
+            <FavouritesProvider>
+              <CartProvider>
+                <Header />
+                <Routes>
+                  <Route path="/" element={<Heroui />} />
+                  <Route path="/SignUp" element={<Signup />} />
+                  <Route path="/SignIn" element={<SignIn />} />
+                  <Route path="/Home" element={<Home />} />
+                  <Route path="/Details/:id" element={<Details />} />
+                  <Route path="/Favourites" element={<Favourites />} />
+
+                  <Route
+                    path="/category/:categoryName"
+                    element={<CategoryPage key={Math.random()} />}
+                  />
+                  <Route path="/Cart" element={<Cart />} />
+                  <Route path="/Checkout" element={<Checkout />} />
+                  <Route path="/Payment" element={<Payment />} />
+                  <Route path="/AdminDash" element={<AdminDash />} />
+                  {/* Protected Route for Admin */}
+                  <Route
+                    path="/AdminDash"
+                    element={
+                      <ProtectedRoute adminOnly={true}>
+                        <AdminDash />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </CartProvider>
+            </FavouritesProvider>
+          </ParallaxProvider>
+        </UserProvider>
+      </React.StrictMode>
+    </ReactLenis>
   );
 }
 

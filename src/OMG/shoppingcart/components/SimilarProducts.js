@@ -1,39 +1,64 @@
-// SimilarProducts.js
-import React from "react";
-import productsData from "../data/productsData";
-import "./SimilarProducts.css";
+import React, { useEffect, useState } from "react";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { Link } from "react-router-dom";
+import "./SimilarProducts.css";
+import { db } from "../../db/Firebase"; // Adjust the path to your Firebase configuration
 
 const SimilarProducts = ({ category, id }) => {
-  // Filter products from the same category, excluding the current product
-  const sameCategoryProducts = productsData.filter(
-    (product) => product.category === category && product.id !== id
-  );
+  const [similarProducts, setSimilarProducts] = useState([]);
 
-  // Filter products from other categories
-  const otherCategoryProducts = productsData.filter(
-    (product) => product.category !== category
-  );
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        // Fetch all products
+        const productsRef = collection(db, "Products");
+        const querySnapshot = await getDocs(productsRef);
 
-  // Shuffle the otherCategoryProducts array
-  const shuffledOtherCategoryProducts = otherCategoryProducts.sort(
-    () => Math.random() - 0.5
-  );
+        // Convert Firestore data into an array of product objects
+        const allProducts = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-  // Calculate the number of similar products to display
-  const numSimilarProducts = 5;
+        // Filter products from the same category, excluding the current product
+        const sameCategoryProducts = allProducts.filter(
+          (product) => product.category === category && product.id !== id
+        );
 
-  // Calculate the number of products from the same category to display (70%)
-  const numSameCategoryProducts = Math.floor(numSimilarProducts * 0.7);
+        // Filter products from other categories
+        const otherCategoryProducts = allProducts.filter(
+          (product) => product.category !== category
+        );
 
-  // Calculate the number of products from other categories to display (30%)
-  const numOtherCategoryProducts = numSimilarProducts - numSameCategoryProducts;
+        // Shuffle the otherCategoryProducts array
+        const shuffledOtherCategoryProducts = otherCategoryProducts.sort(
+          () => Math.random() - 0.5
+        );
 
-  // Get the products to display
-  const similarProducts = [
-    ...sameCategoryProducts.slice(0, numSameCategoryProducts),
-    ...shuffledOtherCategoryProducts.slice(0, numOtherCategoryProducts),
-  ];
+        // Define the number of products to display
+        const numSimilarProducts = 5;
+
+        // Calculate number of products to display from the same category (70%)
+        const numSameCategoryProducts = Math.floor(numSimilarProducts * 0.7);
+
+        // Calculate number of products from other categories to display (30%)
+        const numOtherCategoryProducts =
+          numSimilarProducts - numSameCategoryProducts;
+
+        // Combine products
+        const finalSimilarProducts = [
+          ...sameCategoryProducts.slice(0, numSameCategoryProducts),
+          ...shuffledOtherCategoryProducts.slice(0, numOtherCategoryProducts),
+        ];
+
+        setSimilarProducts(finalSimilarProducts);
+      } catch (error) {
+        console.error("Error fetching products: ", error);
+      }
+    };
+
+    fetchProducts();
+  }, [category, id]);
 
   return (
     <div className="similar-products">
@@ -43,8 +68,9 @@ const SimilarProducts = ({ category, id }) => {
           <div key={product.id} className="product-card">
             <img src={product.img} alt={product.title} />
             <Link to={`/Details/${product.id}`}>
-              <h3>{product.title}</h3>
+              <h2>{product.Name}</h2>
             </Link>
+            <p>{product.Category}</p>
             <p>₹ {product.price.toLocaleString()}</p>
           </div>
         ))}

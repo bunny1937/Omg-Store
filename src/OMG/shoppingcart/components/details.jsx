@@ -5,17 +5,14 @@ import Cart from "./Cart";
 import { Collapse } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { FavouritesContext } from "./FavoritesContext";
-import Favourites from "./Favourites"; // Import Favourites component
 import SimilarProducts from "./SimilarProducts";
-import gridimg1 from "./pages/photos/omglogo.jpg";
-import gridimg2 from "./pages/photos/omglogo.jpg";
-import gridimg3 from "./pages/photos/omglogo.jpg";
-import gridimg4 from "./pages/photos/omglogo.jpg";
 import ReviewSection from "./ReviewSection";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore";
 import { firebaseApp } from "../../db/Firebase";
 import { useParams } from "react-router-dom";
-
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 const db = getFirestore(firebaseApp);
 
 const Details = () => {
@@ -56,14 +53,16 @@ const Details = () => {
     return <div>Product not found!</div>;
   }
 
-  const { Img, Name, price, Category } = product;
+  const { ImgUrls = [], Name, Description, price, Gender, Category } = product;
 
   const handleAddToCart = () => {
     const item = {
       id,
-      Img,
+      Img: ImgUrls[0],
       Category,
+      Gender,
       Name,
+      Description,
       price,
       quantity,
       size: selectedSize,
@@ -76,8 +75,18 @@ const Details = () => {
   };
 
   const handleAddToFavourites = () => {
-    addFavourite(product);
-    setIsFavourite(true);
+    if (!selectedSize) {
+      alert("Please select a size before adding to favourites.");
+      return;
+    }
+
+    const favouriteItem = {
+      ...product,
+      id: String(id),
+      size: selectedSize,
+    };
+
+    addFavourite(favouriteItem);
   };
 
   const handleSizeSelect = (size) => {
@@ -101,32 +110,53 @@ const Details = () => {
       setShippingOpen(!shippingOpen);
     }
   };
+  const settings = {
+    infinite: true,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    arrows: true,
+    cssEase: "linear",
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
   return (
     <>
       <div className="details">
         <div className="details-container">
           <div className="img-section">
-            <img src={Img} alt="product-img" />
-            <div className="grid">
-              <div className="grid-img">
-                <img src={gridimg1} alt="grid-img-1" />
-              </div>
-              <div className="grid-img">
-                <img src={gridimg2} alt="grid-img-2" />
-              </div>
-              <div className="grid-img">
-                <img src={gridimg3} alt="grid-img-3" />
-              </div>
-              <div className="grid-img">
-                <img src={gridimg4} alt="grid-img-4" />
-              </div>
-            </div>
+            <Slider {...settings}>
+              {ImgUrls.map((url, index) => (
+                <div key={index}>
+                  <img src={url} alt={`product-img-${index}`} />
+                </div>
+              ))}
+            </Slider>
           </div>
           <div className="details-section">
             <div className="details-actions">
               <h2>{Name}</h2>
-              <h2>{Category}</h2>
+              <h3>{Category}</h3>
               <p>₹ {price ? price.toLocaleString() : "Price not available"}</p>
+              <div className="feature-container">
+                <div className="feature-item ">
+                  <span>240 GSM</span>
+                  <img src="icon1.svg" alt="240 GSM Icon" />
+                </div>
+                <div className="feature-item ">
+                  <span>OVERSIZED FIT</span>
+                  <img src="icon2.svg" alt="Oversized Fit Icon" />
+                </div>
+                <div className="feature-item">
+                  <span>UNISEX</span>
+                  <img src="icon3.svg" alt="Unisex Icon" />
+                </div>
+                <div className="feature-item ">
+                  <span>DTF</span>
+                  <img src="icon4.svg" alt="DTF Icon" />
+                </div>
+              </div>
+
               <div className="size-box">
                 {sizes.map((size) => (
                   <button
@@ -149,6 +179,7 @@ const Details = () => {
                 type="button"
                 className={`btn1 ${isAdded ? "added" : ""}`}
                 onClick={handleAddToCart}
+                disabled={!selectedSize}
               >
                 {isAdded ? "Added" : "Add to cart"}
               </button>
@@ -156,6 +187,7 @@ const Details = () => {
                 type="button"
                 className={`btn1 ${isFavourite ? "favourited" : ""}`}
                 onClick={handleAddToFavourites}
+                disabled={!selectedSize}
               >
                 {isFavourite ? "Favourited" : "Add to favourites"}
               </button>
@@ -163,14 +195,8 @@ const Details = () => {
             <div className="description-box">
               <div className="prod-details">
                 <h3>Product Details</h3>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
-                  laboris nisi ut aliquip ex ea commodo consequat
-                </p>
               </div>
-              <div className="accordion">
+              <div className="details-accordion">
                 <div>
                   <h3
                     onClick={() => toggleContent("description")}
@@ -185,10 +211,7 @@ const Details = () => {
                   </h3>
                   <Collapse in={descriptionOpen}>
                     <div className="accordion-content">
-                      <p>
-                        This is the product description. It could be quite long,
-                        so the accordion is perfect for this.
-                      </p>
+                      <p>{Description}</p>
                     </div>
                   </Collapse>
                 </div>
@@ -220,6 +243,7 @@ const Details = () => {
           </div>
         </div>
         <Cart />
+
         <div className="similar-details">
           <SimilarProducts category={Category} id={id} />
         </div>

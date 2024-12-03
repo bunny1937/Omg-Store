@@ -71,28 +71,51 @@ const CartProvider = ({ children }) => {
   const addItem = async (item) => {
     if (!user?.uid) return;
     try {
-      // Ensure the item has all necessary properties before adding
+      // Validate the item has all required fields
       if (
         !item.id ||
         !item.Img ||
         !item.Name ||
         !item.price ||
         !item.quantity ||
-        !item.Category
+        !item.Category ||
+        !item.Gender ||
+        !item.size
       ) {
         console.error("Invalid item in ADD_TO_CART action:", item);
         return;
       }
 
+      // Log the item received
+      console.log("Original item received:", item);
+
+      // Prepare item with only the first image
+      const itemToAdd = {
+        id: item.id,
+        Img: item.Img, // Use only the first image
+        Name: item.Name,
+        price: item.price,
+        quantity: item.quantity,
+        Category: item.Category,
+        Gender: item.Gender,
+        size: item.size,
+      };
+      // Double-checking that ImgUrls is removed
+      console.log("Modified item to add:", itemToAdd);
+
       // Add item to Firestore (or update if it already exists)
       const cartDocRef = doc(firestore, "users", user.uid, "Cart", item.id);
 
-      await setDoc(cartDocRef, item); // Firestore operation
+      await setDoc(cartDocRef, itemToAdd); // Firestore operation
 
       // Once Firestore is updated, update local state
-      dispatch({ type: "ADD_TO_CART", payload: item });
+      dispatch({ type: "ADD_TO_CART", payload: itemToAdd });
+      console.log(
+        "Item successfully added to cart with single image:",
+        itemToAdd
+      );
 
-      console.log("Item added to cart:", item);
+      console.log("Item added to cart:", itemToAdd);
     } catch (error) {
       console.error("Error adding item to cart:", error);
     }
@@ -103,22 +126,18 @@ const CartProvider = ({ children }) => {
     try {
       const userId = auth.currentUser.uid; // Replace with your auth mechanism
       const cartDocRef = doc(firestore, "users", userId, "Cart", itemId);
+      dispatch({ type: "REMOVE_FROM_CART", payload: { itemId, size } });
 
       // Delete from Firestore
       await deleteDoc(cartDocRef);
-      setTimeout(() => {
-        // Remove from local state
-        dispatch({ type: "REMOVE_FROM_CART", payload: { itemId } });
-      }, 100); // 100ms delay before dispatching
-
-      // Now remove from local state
-      dispatch({ type: "REMOVE_FROM_CART", payload: itemId, size });
 
       console.log(`Item ${itemId} removed from cart`);
     } catch (error) {
       console.error("Error removing item from Firestore:", error);
     }
-  }; // Increment item quantity
+  };
+
+  // Increment item quantity
   const incrementItem = async (itemId) => {
     if (!user?.uid) return;
 

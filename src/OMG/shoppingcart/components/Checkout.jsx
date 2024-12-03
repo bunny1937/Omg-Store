@@ -1,39 +1,52 @@
-import React, { useContext, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState, useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import cartContext from "../context/cartContext";
 import { firestore, auth, db } from "../../db/Firebase";
-import { collection, doc, getDocs, addDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  addDoc,
+  Timestamp,
+} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import "./Checkout.css";
 
-const Checkout = () => {
+const Checkout = (onClose) => {
+  const checkoutRef = useRef(null);
+  const navigate = useNavigate(); // For navigation after order is saved
   const { cartItems, updateCartItem } = useContext(cartContext);
   const [userId, setUserId] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [showAddressDetails, setShowAddressDetails] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState([]);
-  const [selectedAddressId, setSelectedAddressId] = useState(""); // Store the selected address ID
-
+  const [selectedAddressId, setSelectedAddressId] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showCouponInput, setShowCouponInput] = useState(false);
+  const [totalAmount] = useState(0);
+
+  const [userInfo, setUserInfo] = useState(null); // State to hold user info
   const [shippingInfo, setShippingInfo] = useState({
+    city: "",
+    flat: "",
+    locality: "",
     name: "",
     number: "",
-    flat: "",
-    street: "",
-    locality: "",
-    city: "",
     pinCode: "",
     state: "",
+    street: "",
   });
-
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        console.log("User is authenticated:", user.uid); // Log the authenticated user UID
         setUserId(user.uid);
       } else {
         alert("User not authenticated. Please log in.");
@@ -44,11 +57,72 @@ const Checkout = () => {
   }, []);
 
   useEffect(() => {
+    // Animate page entry
+    gsap.fromTo(
+      checkoutRef.current,
+      { x: "100%", opacity: 0 },
+      { x: "0%", opacity: 1, duration: 0.8, ease: "power3.out" }
+    );
+
+    return () => {
+      // Optional: Cleanup or reverse animation on unmount
+      gsap.to(checkoutRef.current, {
+        x: "-100%",
+        opacity: 0,
+        duration: 0.6,
+        ease: "power3.in",
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    if (userId) {
+      // Fetch user data from Firestore
+      const fetchUserInfo = async () => {
+        try {
+          console.log("Fetching user info for UID:", userId);
+          const userRef = doc(firestore, "users", userId);
+          const userDoc = await getDoc(userRef);
+          if (userDoc.exists()) {
+            console.log("User info fetched:", userDoc.data()); // Log the fetched user info
+            setUserInfo(userDoc.data()); // Set the user data into state
+          } else {
+            console.log("No user data found.");
+          }
+        } catch (error) {
+          console.error("Error fetching user info:", error);
+        }
+      };
+      fetchUserInfo();
+    }
+  }, [userId]);
+  // Function to save the order to Firestore
+  // const saveOrder = async () => {
+  //   if (userInfo && selectedAddress) {
+  //     const orderRef = collection(firestore, "users", userId, "orders");
+  //     const newOrder = {
+  //       cartItems,
+  //       shippingInfo: selectedAddress,
+  //       totalAmount: cartTotal,
+  //       orderCreatedAt: Timestamp.fromDate(new Date()),
+  //     };
+  //     try {
+  //       await addDoc(orderRef, newOrder);
+  //       navigate("/Payment");
+  //     } catch (error) {
+  //       console.error("Error saving order:", error);
+  //     }
+  //   } else {
+  //     alert("Please select an address and ensure the cart is not empty.");
+  //   }
+  // };
+
+  useEffect(() => {
     // Fetch addresses only if userId is available
     if (userId) {
       const fetchAddresses = async () => {
         try {
-          const addressesRef = collection(db, "users", userId, "orders");
+          const addressesRef = collection(db, "users", userId, "ShippingInfo");
           const snapshot = await getDocs(addressesRef);
           const addresses = snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -66,7 +140,12 @@ const Checkout = () => {
     // Fetch saved addresses if userId is available
     const fetchSavedAddresses = async () => {
       if (userId) {
-        const addressesRef = collection(firestore, "users", userId, "orders");
+        const addressesRef = collection(
+          firestore,
+          "users",
+          userId,
+          "ShippingInfo"
+        );
         const snapshot = await getDocs(addressesRef);
         setSavedAddresses(
           snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
@@ -83,21 +162,31 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (userId) {
-      const userOrderRef = collection(firestore, "users", userId, "orders");
-      await addDoc(userOrderRef, { ...shippingInfo });
-      alert("Shipping information saved successfully.");
-      setShowForm(false); // Hide form after saving
-      setShippingInfo({
-        name: "",
-        number: "",
-        flat: "",
-        street: "",
-        locality: "",
-        city: "",
-        pinCode: "",
-        state: "",
-      }); // Clear form fields
-      setSavedAddresses((prev) => [...prev, { ...shippingInfo }]); // Add new address to local state
+      const userOrderRef = collection(
+        firestore,
+        "users",
+        userId,
+        "ShippingInfo"
+      );
+
+      // Include userInfo in the order details
+      const orderData = {
+        ...shippingInfo,
+      };
+
+      console.log("Submitting order data:", orderData); // Log the data before submitting
+
+      try {
+        await addDoc(userOrderRef, orderData);
+        alert("Shipping information saved successfully.");
+        setShowForm(false); // Hide form after saving
+        setShippingInfo({}); // Clear form fields
+        setSavedAddresses((prev) => [...prev, { ...orderData }]); // Add new address to local state
+      } catch (error) {
+        console.error("Error saving order data:", error);
+      }
+    } else {
+      console.log("User info or user ID is missing, cannot submit order.");
     }
   };
   const handleAddressSelection = (addressId) => {
@@ -133,8 +222,39 @@ const Checkout = () => {
   const handleQuantityChange = (item, newQuantity) => {
     updateCartItem(item.id, newQuantity);
   };
+
+  // Save the order details to Firestore and navigate to payment page
+  const handlePayClick = async () => {
+    if (userId && selectedAddress && cartItems.length > 0) {
+      try {
+        const orderRef = collection(firestore, "users", userId, "orders");
+        const newOrder = {
+          cartItems,
+          shippingInfo: selectedAddress,
+          totalAmount: cartTotal,
+          orderCreatedAt: new Date(),
+          userInfo: {
+            email: userInfo.email,
+            phoneNumber: userInfo.phoneNumber,
+            firstName: userInfo.firstName,
+            lastName: userInfo.lastName,
+            userId: userId,
+          },
+        };
+
+        console.log("Saving order to Firestore:", newOrder); // Debugging log
+        await addDoc(orderRef, newOrder); // Save order to Firestore
+        navigate("/Payment"); // Navigate to payment page
+      } catch (error) {
+        console.error("Error saving order:", error);
+      }
+    } else {
+      alert("Please select an address and ensure the cart is not empty.");
+    }
+  };
+
   return (
-    <div className="checkout">
+    <div className="checkout" ref={checkoutRef}>
       <div className="checkout-container">
         <div className="cart-items">
           {cartItems.map((item, index) => (
@@ -152,6 +272,7 @@ const Checkout = () => {
                 <h2>{item.Name}</h2>
                 <h3>Category: {item.Category}</h3>
                 <h4>₹ {item.price.toLocaleString()}</h4>
+                <h3>Size : {item.size}</h3>
                 <div className="cart-item-pricing">
                   <div className="quantity-controls">
                     <button
@@ -297,65 +418,55 @@ const Checkout = () => {
           {/* Saved Addresses Dropdown */}
           <div className="address-selection">
             <label>Select Address:</label>
-            <select
-              onChange={(e) => handleAddressSelection(e.target.value)}
-              value={selectedAddressId}
-            >
-              <option value="" disabled>
-                Select an address
-              </option>
-              {savedAddresses.map((address) => (
-                <option key={address.id} value={address.id}>
-                  {address.name}, {address.number},{address.flatbuilding},
-                  {address.street},{address.locality}, {address.city},
-                  {address.state}, {address.pinCode}
-                </option>
-              ))}
-            </select>
+
+            {savedAddresses.map((address, index) => (
+              <div key={index} className="address-option">
+                <input
+                  type="radio"
+                  name="address"
+                  value={address.id}
+                  checked={selectedAddressId === address.id}
+                  onChange={() => handleAddressSelection(address.id)}
+                />
+                {address.name}, {address.number},{address.flat}.........
+              </div>
+            ))}
+            {selectedAddress && (
+              <div className="address-details-form">
+                <h4>Address Details</h4>
+                <div>
+                  <strong>Name:</strong> {selectedAddress.name}
+                </div>
+                <div>
+                  <strong>Number:</strong> {selectedAddress.number}
+                </div>
+                <div>
+                  <strong>Flat No:</strong> {selectedAddress.flat}
+                </div>
+                <div>
+                  <strong>Building Name:</strong> {selectedAddress.buildingName}
+                </div>
+                <div>
+                  <strong>Street Name:</strong> {selectedAddress.streetName}
+                </div>
+                <div>
+                  <strong>Locality:</strong> {selectedAddress.locality}
+                </div>
+                <div>
+                  <strong>City:</strong> {selectedAddress.city}
+                </div>
+                <div>
+                  <strong>State:</strong> {selectedAddress.state}
+                </div>
+                <div>
+                  <strong>Pin Code:</strong> {selectedAddress.pinCode}
+                </div>
+              </div>
+            )}
+            {selectedAddressId && (
+              <button onClick={handleCancelSelection}>Cancel Selection</button>
+            )}
           </div>
-
-          {showAddressDetails && selectedAddress ? (
-            <div className="address-details-form">
-              <h4>Address Details</h4>
-              <div>
-                <strong>Name:</strong> {selectedAddress.name}
-              </div>
-              <div>
-                <strong>Number:</strong> {selectedAddress.number}
-              </div>
-              <div>
-                <strong>Flat No:</strong> {selectedAddress.flatNo}
-              </div>
-              <div>
-                <strong>Building Name:</strong> {selectedAddress.buildingName}
-              </div>
-              <div>
-                <strong>Street Name:</strong> {selectedAddress.streetName}
-              </div>
-              <div>
-                <strong>Locality:</strong> {selectedAddress.locality}
-              </div>
-              <div>
-                <strong>City:</strong> {selectedAddress.city}
-              </div>
-              <div>
-                <strong>State:</strong> {selectedAddress.state}
-              </div>
-              <div>
-                <strong>Pin Code:</strong> {selectedAddress.pinCode}
-              </div>
-              <button
-                className="add-address-button"
-                onClick={handleCancelSelection}
-              >
-                Cancel Selection
-              </button>
-              {/* Cancel button */}
-            </div>
-          ) : (
-            <p>Select an address to view its details.</p>
-          )}
-
           <div className="summary-details">
             <div className="summary-row">
               <span>Subtotal</span>
@@ -379,6 +490,7 @@ const Checkout = () => {
                 Have a coupon code?
               </button>
             )}
+            {/* <button onClick={saveOrder}>Save Order</button> */}
 
             {showCouponInput && (
               <div className="coupon-section">
@@ -398,11 +510,12 @@ const Checkout = () => {
               </div>
             )}
           </div>
-          <Link to="/payment">
+          <Link to={"/Payment"}>
             <motion.button
               className="pay-button"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={handlePayClick}
             >
               Pay
             </motion.button>

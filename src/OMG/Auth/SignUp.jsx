@@ -43,6 +43,7 @@ function SignUp() {
 
       // Store user details in Firestore under "users" collection
       await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
         email: user.email,
         firstName: firstName,
         lastName: lastName,
@@ -68,6 +69,7 @@ function SignUp() {
 
       // Store user ID in Firestore if it's a new user
       await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
         email: user.email,
         firstName: firstName || "N/A",
         lastName: lastName || "N/A",
@@ -83,6 +85,7 @@ function SignUp() {
 
   return (
     <div className="signup-container">
+      <div className="logo"></div>
       <div className="signup-form">
         <div className="header">
           <h1 className="title">Signup</h1>
@@ -148,7 +151,7 @@ function SignUp() {
         </div>
         <div className="login-link">
           <h2 className="text">
-            Already have an account?{" "}
+            Already have an account?
             <Link className="link" to={"/SignIn"}>
               Sign In
             </Link>

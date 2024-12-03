@@ -3,20 +3,21 @@ import cartContext from "../context/cartContext";
 import { Link } from "react-router-dom";
 import { FavouritesContext } from "./FavoritesContext";
 import Slider from "react-slick";
+import Tilt from "react-parallax-tilt";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { firestore, doc, auth } from "../../db/Firebase";
 import { getDoc } from "firebase/firestore";
 import { setDoc } from "firebase/firestore"; // Import setDoc
 
-const ProductsCard = ({ id, Name, Category, price, Img }) => {
+const ProductsCard = ({ id, Name, Category, price, ImgUrls }) => {
   const { addFavourite } = useContext(FavouritesContext);
   const { addItem, dispatch } = useContext(cartContext);
   const [isAdded, setIsAdded] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
 
   const handleAddToFavourites = () => {
-    const item = { id, Name, Category, price, Img };
+    const item = { id, Name, Category, price, ImgUrls };
     addFavourite(item);
     setIsFavourite(true);
 
@@ -40,15 +41,27 @@ const ProductsCard = ({ id, Name, Category, price, Img }) => {
 
       if (productDoc.exists()) {
         const productData = productDoc.data();
+        const { ImgUrls = [], ...otherProductData } = productData;
+        const mainImage = ImgUrls[0] || null; // Only the first image
 
-        // Add the product to the cart state
+        if (!mainImage) {
+          console.error("Main image not available in ImgUrls:", ImgUrls);
+          return;
+        }
+
+        // Add the product to the cart state with only the first image
         dispatch({
           type: "ADD_TO_CART",
-          payload: { ...productData, id: productId },
+          payload: {
+            ...otherProductData,
+            id: productId,
+            Img: mainImage,
+            quantity: 1,
+          },
         });
 
         // Also add the product to Firestore under the user's cart collection
-        const userId = auth.currentUser?.uid; // Ensure the user is authenticated
+        const userId = auth.currentUser?.uid;
         if (userId) {
           const userCartRef = doc(
             firestore,
@@ -58,11 +71,16 @@ const ProductsCard = ({ id, Name, Category, price, Img }) => {
             productId
           );
           await setDoc(userCartRef, {
-            ...productData,
+            ...otherProductData,
+            Img: mainImage,
             id: productId,
-            quantity: 1, // Add initial quantity or customize as needed
+            quantity: 1,
           });
-          console.log("Product added to Firestore cart successfully");
+          console.log("Product added to Firestore cart successfully:", {
+            ...otherProductData,
+            Img: mainImage,
+            id: productId,
+          });
         } else {
           console.error("User not authenticated");
         }
@@ -98,30 +116,33 @@ const ProductsCard = ({ id, Name, Category, price, Img }) => {
         <div className="product_card_img">
           {/* Uncomment the Slider component if needed */}
           <Slider {...settings}>
-            <div>
-              <img src={Img} alt="item-img" />
-            </div>
-            <div>
-              <img src={Img} alt="item-img" />
-            </div>
-            <div>
-              <img src={Img} alt="item-img" />
-            </div>
+            {ImgUrls &&
+              ImgUrls.map((imgUrl, i) => (
+                <div key={i}>
+                  <img src={imgUrl} alt={`product-img-${i}`} />
+                </div>
+              ))}
           </Slider>
           {/* <img src={Img} alt="item-img" /> */}
         </div>
         <div className="details-btn">
           {id && Name ? (
             <Link to={`/Details/${id}`}>
-              <h4 className="title">{Name}</h4>
+              <h3>{Name}</h3>
             </Link>
           ) : (
-            <h4 className="title">No Title Available</h4>
+            <h4>No Title Available</h4>
           )}
           <h3 className="price">₹ {price.toLocaleString()}</h3>
         </div>
-        <h4 className="category">{Category}</h4>
-        <div className="card-actions">
+        <h4>{Category}</h4>
+        <button
+          className={`btn-fav ${isFavourite ? "favourited" : ""}`}
+          onClick={handleAddToFavourites}
+        >
+          <div className="fav-icon1"></div>
+        </button>
+        {/* <div className="card-actions">
           <button
             type="button"
             className={`btn1 ${isAdded ? "added" : ""}`}
@@ -136,7 +157,7 @@ const ProductsCard = ({ id, Name, Category, price, Img }) => {
           >
             <div className="fav-icon1"></div>
           </button>
-        </div>
+        </div> */}
       </div>
     </>
   );

@@ -1,0 +1,112 @@
+/* Wrapper for the entire horizontal scroll */
+.horizontal-scroll-wrapper {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background-color: #f7f7f7; /* Light background for entire scroll wrapper */
+}
+
+/* Container for the scrollable content */
+.scroll-container {
+  display: flex;
+  height: 100%;
+  transition: transform 0.3s ease; /* Smooth scrolling effect */
+}
+
+/* Individual category box */
+.category-box {
+  flex: 0 0 100vw; /* Each category takes the full viewport width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  background-color: #f7f7f7; /* Default background */
+  border: 1px solid #ccc; /* Subtle border */
+  box-sizing: border-box; /* Ensure padding and border are included in width/height */
+  transition: background-color 0.3s ease; /* Smooth hover background change */
+}
+
+/* Alternating background color for better visibility */
+.category-box:nth-child(odd) {
+  background-color: #e7e7e7;
+}
+
+/* Category text styling */
+.category-box h2 {
+  text-transform: uppercase;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #333; /* Dark text color */
+  margin: 0;
+}
+
+/* Hover effect for buttons inside the category boxes */
+.category-box button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: inherit; /* Match the parent font size */
+  font-weight: inherit;
+  color: inherit; /* Match the parent text color */
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.category-box button:hover {
+  background-color: #e04e3a; /* Highlight color */
+  color: #fff; /* Change text color to white */
+}
+
+/* Grid layout for items within a category */
+.category-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box; /* Include padding in width calculations */
+  background-color: #fff; /* White background for item grid */
+}
+
+/* Individual category item styling */
+.category-item {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for card effect */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.category-item:hover {
+  transform: translateY(-5px); /* Lift effect on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+}
+
+/* Styling for images inside category items */
+.category-item img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: cover; /* Ensure images are properly cropped */
+  border-radius: 4px; /* Rounded corners */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .category-box h2 {
+    font-size: 2rem; /* Reduce text size for smaller screens */
+  }
+
+  .category-items {
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(150px, 1fr)
+    ); /* Adjust grid for narrow screens */
+  }
+
+  .category-item {
+    padding: 15px; /* Reduce padding for smaller items */
+  }
+}

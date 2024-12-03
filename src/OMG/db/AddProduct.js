@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { storage, db } from "./Firebase.js";
+import { db } from "./Firebase.js";
 import {
   ref,
   getStorage,
@@ -9,52 +9,61 @@ import {
 import { collection, doc, setDoc, getDocs } from "./Firebase.js"; // Import the collection function
 
 import "./AddProducts.css";
-console.log("Storage:", storage); // Add this line
+import OrdersDash from "./OrdersDash.jsx";
 
 export const AddProducts = () => {
   const [Name, setProductName] = useState("");
+  const [Description, setProductDescription] = useState("");
   const [price, setProductPrice] = useState(0);
   const [Category, setProductCategory] = useState("");
   const [quantity, setProductQuantity] = useState(0);
-  const [productImg, setProductImg] = useState(null);
+  const [productImgs, setProductImgs] = useState([]);
   const [error, setError] = useState("");
+  const [Gender, setProductGender] = useState("");
   const [progress, setProgress] = useState(0);
 
-  const types = ["image/png", "image/jpeg"]; // image types
+  const types = ["image/png", "image/jpg", "image/jpeg"]; // image types
 
-  const productImgHandler = (e) => {
-    let selectedFile = e.target.files[0];
-    if (selectedFile && types.includes(selectedFile.type)) {
-      setProductImg(selectedFile);
+  const productImgsHandler = (e) => {
+    let selectedFiles = Array.from(e.target.files);
+    const validFiles = selectedFiles.filter((file) =>
+      types.includes(file.type)
+    );
+
+    if (validFiles.length === selectedFiles.length) {
+      setProductImgs(validFiles);
       setError("");
     } else {
-      setProductImg(null);
-      setError("Please select a valid image type (jpg or png)");
+      setProductImgs([]);
+      setError("Please select valid image types (jpg or png) only.");
     }
-    console.log("Product Image:", productImg); // Add this line
   };
 
   // add product
-  const addProduct = (e) => {
+  const addProduct = async (e) => {
     e.preventDefault();
     const storage = getStorage(); // Get the default storage bucket
+    setProgress(new Array(productImgs.length).fill(0)); // Reset progress tracking for each image
 
     let storageRef;
     switch (Category) {
       case "Jeans":
-        storageRef = ref(storage, `/Products/Jeans/${productImg.name}`);
+        storageRef = ref(storage, `/Products/Jeans/${productImgs.name}`);
         break;
       case "Oversize":
-        storageRef = ref(storage, `/Products/Oversize/${productImg.name}`);
+        storageRef = ref(storage, `/Products/Oversize/${productImgs.name}`);
         break;
       case "Pants":
-        storageRef = ref(storage, `/Products/Pants/${productImg.name}`);
+        storageRef = ref(storage, `/Products/Pants/${productImgs.name}`);
         break;
       case "Shirts":
-        storageRef = ref(storage, `/Products/Shirts/${productImg.name}`);
+        storageRef = ref(storage, `/Products/Shirts/${productImgs.name}`);
         break;
       case "Tshirts":
-        storageRef = ref(storage, `/Products/Tshirts/${productImg.name}`);
+        storageRef = ref(storage, `/Products/Tshirts/${productImgs.name}`);
+        break;
+      case "Hoodies":
+        storageRef = ref(storage, `/Products/Hoodies/${productImgs.name}`);
         break;
       default:
         setError("Please select a valid product category");
@@ -63,133 +72,174 @@ export const AddProducts = () => {
 
     console.log("Storage Ref:", storageRef); // Add this line
 
-    const uploadTask = uploadBytesResumable(storageRef, productImg);
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setProgress(progress);
-        console.log("Upload is " + progress + "% done");
-        switch (snapshot.state) {
-          case "paused":
-            console.log("Upload is paused");
-            break;
-          case "running":
-            console.log("Upload is running");
-            break;
-        }
-      },
-      (err) => setError(err.message),
-      () => {
-        getDownloadURLFromStorage(storageRef).then((url) => {
-          const productsCollectionRef = collection(db, "Products");
+    try {
+      // Upload each image and get URLs
+      const uploadTasks = productImgs.map((img, index) => {
+        const storageRef = ref(
+          storage,
+          `/Products/${Category}/${Date.now()}_${img.name}`
+        );
 
-          getDocs(productsCollectionRef).then((querySnapshot) => {
-            const newId = querySnapshot.docs.length + 1;
-            const newDocRef = doc(productsCollectionRef, String(newId));
-            setDoc(newDocRef, {
-              id: newId,
-              Name: Name,
-              price: Number(price),
-              Category: Category,
-              quantity: quantity,
-              Img: url,
-            })
-              .then(() => {
-                setProductName("");
-                setProductCategory("");
-                setProductPrice(0);
-                setProductImg("");
-                setProductQuantity(0);
-                setError("");
-                setProgress(0);
-                document.getElementById("file").value = "";
-              })
-              .catch((err) => setError(err.message));
-          });
+        return new Promise((resolve, reject) => {
+          const uploadTask = uploadBytesResumable(storageRef, img);
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const currentProgress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              setProgress((prevProgress) => {
+                const updatedProgress = [...prevProgress];
+                updatedProgress[index] = currentProgress;
+                return updatedProgress;
+              });
+            },
+            (error) => reject(error),
+            () => {
+              getDownloadURLFromStorage(uploadTask.snapshot.ref)
+                .then((url) => resolve(url))
+                .catch((error) => reject(error));
+            }
+          );
         });
-      }
-    );
+      });
+
+      const imgUrls = await Promise.all(uploadTasks);
+
+      // Save product data to Firestore
+      const productsCollectionRef = collection(db, "Products");
+      const querySnapshot = await getDocs(productsCollectionRef);
+      const newId = querySnapshot.docs.length + 1; // ID based on existing count
+      const newDocRef = doc(productsCollectionRef, String(newId));
+
+      await setDoc(newDocRef, {
+        id: newId,
+        Name,
+        Description,
+        price: Number(price),
+        Category,
+        Gender,
+        quantity,
+        ImgUrls: imgUrls,
+      });
+
+      // Reset the form
+      setProductName("");
+      setProductDescription("");
+      setProductGender();
+      setProductCategory("");
+      setProductPrice(0);
+      setProductImgs([]);
+      setProductQuantity(0);
+      setError("");
+      setProgress([]);
+      document.getElementById("file").value = ""; // Clear file input
+    } catch (error) {
+      setError(`Error: ${error.message}`);
+    }
   };
 
   return (
-    <div className="add-container">
-      <br />
-      <h2>ADD PRODUCTS</h2>
-      <hr />
-      <form autoComplete="off" className="form-group" onSubmit={addProduct}>
-        <label htmlFor="product-category">Product Category</label>
-        <select
-          className="text-input"
-          required
-          onChange={(e) => setProductCategory(e.target.value)}
-          value={Category}
-        >
-          <option value="">Select Category</option>
-          <option value="Jeans">Jeans</option>
-          <option value="Oversize">Oversize</option>
-          <option value="Pants">Pants</option>
-          <option value="Shirts">Shirts</option>
-          <option value="Tshirts">Tshirts</option>
-        </select>
+    <>
+      <OrdersDash />
+      <div className="add-container">
         <br />
-        <label htmlFor="product-name">Product Name</label>
-        <input
-          type="text"
-          className="text-input"
-          required
-          onChange={(e) => setProductName(e.target.value)}
-          value={Name}
-        />
-        <br />
-        <label htmlFor="product-price">Product Price</label>
-        <input
-          type="number"
-          className="form-control"
-          required
-          onChange={(e) => setProductPrice(e.target.value)}
-          value={price}
-        />
-        <br />
-        <label htmlFor="product-img">Product Image</label>
-        <input
-          type="file"
-          className="form-control"
-          id="file"
-          required
-          onChange={productImgHandler}
-        />
-        <br />
-        <label htmlFor="product-quantity">Product Quantity</label>
-        <input
-          type="number"
-          className="form-control"
-          required
-          onChange={(e) => setProductQuantity(e.target.value)}
-          value={quantity}
-        />
-        <br />
-        <button type="submit" className="btn btn-success btn-md mybtn">
-          ADD
-        </button>
-        {progress > 0 && (
-          <div className="progress">
-            <div
-              className="progress-bar progress-bar-striped bg-success"
-              role="progressbar"
-              style={{ width: `${progress}%` }}
-              aria-valuenow={progress}
-              aria-valuemin="0"
-              aria-valuemax="100"
-            >
-              {progress}% uploaded
+        <h2>ADD PRODUCTS</h2>
+        <hr />
+        <form autoComplete="off" className="form-group" onSubmit={addProduct}>
+          <label htmlFor="product-category">Product Category</label>
+          <select
+            className="text-input"
+            required
+            onChange={(e) => setProductCategory(e.target.value)}
+            value={Category}
+          >
+            <option value="">Select Category</option>
+            <option value="Jeans">Jeans</option>
+            <option value="Oversize">Oversize</option>
+            <option value="Pants">Pants</option>
+            <option value="Shirts">Shirts</option>
+            <option value="Tshirts">Tshirts</option>
+            <option value="Hoodies">Hoodies</option>
+          </select>
+          <br />
+          <label htmlFor="product-gender">Product Gender</label>
+          <select
+            className="text-input"
+            required
+            onChange={(e) => setProductGender(e.target.value)}
+            value={Gender}
+          >
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="unisex">Unisex</option>
+          </select>
+          <br />
+          <label htmlFor="product-name">Product Name</label>
+          <input
+            type="text"
+            className="text-input"
+            required
+            onChange={(e) => setProductName(e.target.value)}
+            value={Name}
+          />
+          <br />
+          <label htmlFor="product-name">Product Description</label>
+          <input
+            type="text"
+            className="text-input"
+            required
+            onChange={(e) => setProductDescription(e.target.value)}
+            value={Description}
+          />
+          <br />
+          <label htmlFor="product-price">Product Price</label>
+          <input
+            type="number"
+            className="form-control"
+            required
+            onChange={(e) => setProductPrice(e.target.value)}
+            value={price}
+          />
+          <br />
+          <label htmlFor="product-img">Product Image</label>
+          <input
+            type="file"
+            className="form-control"
+            id="file"
+            multiple
+            required
+            onChange={productImgsHandler}
+          />
+          <br />
+          <label htmlFor="product-quantity">Product Quantity</label>
+          <input
+            type="number"
+            className="form-control"
+            required
+            onChange={(e) => setProductQuantity(e.target.value)}
+            value={quantity}
+          />
+          <br />
+          <button type="submit" className="btn btn-success btn-md mybtn">
+            ADD
+          </button>
+          {progress > 0 && (
+            <div className="progress">
+              <div
+                className="progress-bar progress-bar-striped bg-success"
+                role="progressbar"
+                style={{ width: `${progress}%` }}
+                aria-valuenow={progress}
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                {progress}% uploaded
+              </div>
             </div>
-          </div>
-        )}
-      </form>
-    </div>
+          )}
+        </form>
+      </div>
+    </>
   );
 };
 export default AddProducts;

@@ -144,6 +144,7 @@
 @media only screen and (max-width: 767px) {
   .hero-container {
     height: auto;
+    margin: 1rem 0;
     width: 100%;
   }
   .hero-photos {
@@ -161,4 +162,19 @@
   .hero-text1 > p > span {
     font-size: 5rem;
   }
+}
+@media only screen and (max-width: 500px) {
+  .hero-text1 {
+    font-size: 2rem;
+    padding: 1rem 1rem;
+    width: 100%;
+    line-height: 2rem;
+  }
+  .hero-text1 > p > span {
+    font-size: 2.5rem;
+  }
+}
+@media only screen and (max-width: 350px) {
+}
+@media only screen and (max-width: 350px) {
 }
