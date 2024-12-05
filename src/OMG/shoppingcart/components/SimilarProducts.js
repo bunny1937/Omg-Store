@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { Link } from "react-router-dom";
 import "./SimilarProducts.css";
 import { db } from "../../db/Firebase"; // Adjust the path to your Firebase configuration

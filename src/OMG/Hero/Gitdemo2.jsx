@@ -3,7 +3,6 @@ import "./Gitdemo2.css";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "@studio-freight/lenis";
-import Gitdemo from "../Archive/Gitdemo";
 
 // Initialize GSAP ScrollTrigger and Lenis
 gsap.registerPlugin(ScrollTrigger);

@@ -1,9 +1,9 @@
 import React, {
   createContext,
   useReducer,
-  useState,
   useEffect,
   useContext,
+  useCallback,
 } from "react";
 import { firestore, auth } from "../../db/Firebase";
 import {
@@ -12,8 +12,8 @@ import {
   getDoc,
   updateDoc,
   setDoc,
+  writeBatch,
   collection,
-  addDoc,
   deleteDoc,
 } from "firebase/firestore";
 import cartReducer from "./cartReducer";
@@ -42,7 +42,7 @@ const CartProvider = ({ children }) => {
   };
   const cartQuantity = state.cartItems?.length || 0; // Safe fallback for no items
   // Initialize Cart from Firestore
-  const initCart = async () => {
+  const initCart = useCallback(async () => {
     if (!user?.uid) return;
 
     const userCartRef = collection(firestore, "users", user.uid, "Cart");
@@ -55,18 +55,17 @@ const CartProvider = ({ children }) => {
           ...doc.data(),
         }));
 
-        // Dispatch to initialize cart in reducer
         dispatch({ type: "INIT_CART", payload: cartItems });
       }
     } catch (error) {
       console.error("Error fetching cart from Firestore:", error);
     }
-  };
+  }, [user?.uid]);
   useEffect(() => {
     if (user?.uid) {
       initCart();
     }
-  }, [user]);
+  }, [user, initCart]);
   // Add item to cart and Firestore
   const addItem = async (item) => {
     if (!user?.uid) return;
@@ -180,14 +179,35 @@ const CartProvider = ({ children }) => {
   };
 
   // Clear the cart locally and in Firestore
+
   const clearCart = async () => {
     if (!user?.uid) return;
 
     const userCartRef = doc(firestore, "users", user.uid);
 
     try {
+      // Create a batch instance
+      const batch = writeBatch(firestore);
+
+      // Fetch current cart items for batch deletion
+      const cartCollection = collection(firestore, "users", user.uid, "Cart");
+      const cartSnapshot = await getDocs(cartCollection);
+
+      // Add delete operations to the batch
+      cartSnapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref); // Add each document delete to the batch
+      });
+
+      // Commit the batch
+      await batch.commit();
+
+      // Clear the cart locally
       dispatch({ type: "CLEAR_CART" });
+
+      // Optionally, update the user's cart reference to an empty array
       await updateDoc(userCartRef, { cartItems: [] });
+
+      console.log("Cart cleared successfully!");
     } catch (error) {
       console.error("Error clearing cart in Firestore:", error);
     }
@@ -198,7 +218,7 @@ const CartProvider = ({ children }) => {
     if (user?.uid) {
       initCart();
     }
-  }, [user]);
+  }, [user, initCart]);
 
   // Context values
   const values = {

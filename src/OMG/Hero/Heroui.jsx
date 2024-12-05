@@ -1,20 +1,26 @@
 import React from "react";
 import "./Heroui.css";
-import Category from "./Category/Category";
 import Footer from "../shoppingcart/components/Footer";
 import BentoGrid from "./Bento";
 import PromoBanner from "./PromoBanner";
 import Burger from "../shoppingcart/components/burgermenu/header/nav";
 import Images from "../shoppingcart/components/parallax";
 import Scroll1 from "../shoppingcart/components/Scroll";
+import Lenis from "../shoppingcart/components/Lenis";
+import Category from "./Category/Category";
+import Lenis2 from "../shoppingcart/components/Lenis2";
 export default function Heroui() {
   return (
     <>
       {/* <Parallax />
       <Gitdemo2 />
       */}
+      {/* <Lenis /> */}
+
       <BentoGrid />
+      <Lenis2 />
       {/* <AniComponent1 />*/}
+
       <div className="hero">
         <div className="hero-container">
           <div className="hero-photos">

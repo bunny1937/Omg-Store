@@ -70,7 +70,7 @@ export default function Images() {
               style={{ backgroundColor: project.color }}
             >
               <div className="imageContainer">
-                <img src={project.img} alt="image" />
+                <img src={project.img} alt="project1" />
               </div>
             </div>
           );
@@ -85,7 +85,7 @@ export default function Images() {
               style={{ backgroundColor: project.color }}
             >
               <div key={index} className="imageContainer">
-                <img src={project.img} alt="image" />
+                <img src={project.img} alt="project2" />
               </div>
             </div>
           );

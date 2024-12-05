@@ -3,55 +3,38 @@ import {
   getFirestore,
   doc,
   setDoc,
-  getDoc,
   deleteDoc,
   collection,
+  getDocs,
+  writeBatch, // Correct method for Firestore batch operations
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth"; // To get the current user
-import { onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 const FavouritesContext = createContext();
 
 const FavouritesProvider = ({ children }) => {
   const [favouriteItems, setFavouriteItems] = useState([]);
-  const [notification, setNotification] = useState(null);
-  const [userId, setUserId] = useState(null); // State to hold userId
+  const [userId, setUserId] = useState(null); // Holds the user ID when authenticated
   const db = getFirestore();
   const auth = getAuth();
+
+  // Monitor authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserId(user.uid); // Set user ID when authenticated
       } else {
-        setUserId(null); // Reset when user logs out
+        setUserId(null); // Reset when logged out
       }
     });
 
-    return () => unsubscribe(); // Cleanup the listener
+    return () => unsubscribe(); // Cleanup listener
   }, [auth]);
 
+  // Fetch favorites from Firestore
   useEffect(() => {
-    // Fetch favorites from Firestore
     if (userId) {
       const fetchFavourites = async () => {
-        try {
-          const userDoc = doc(db, "users", userId, "Favourites");
-          const userFavourites = await getDoc(userDoc);
-          if (userFavourites.exists()) {
-            const items = userFavourites.data().items || [];
-            setFavouriteItems(items);
-          }
-        } catch (error) {
-          console.error("Error fetching favourites:", error);
-        }
-      };
-      fetchFavourites();
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    // Save favorites to Firestore
-    if (userId) {
-      const saveFavourites = async () => {
         try {
           const favouritesCollection = collection(
             db,
@@ -59,20 +42,21 @@ const FavouritesProvider = ({ children }) => {
             userId,
             "Favourites"
           );
-          const snapshot = await getDoc(favouritesCollection);
+          const snapshot = await getDocs(favouritesCollection);
           const items = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
           setFavouriteItems(items);
         } catch (error) {
-          console.error("Error saving favourites:", error);
+          console.error("Error fetching favourites:", error);
         }
       };
-      saveFavourites();
+      fetchFavourites();
     }
-  }, [favouriteItems, userId]);
+  }, [userId, db]);
 
+  // Add a favourite item
   const addFavourite = async (item) => {
     if (!userId) {
       console.error("User not authenticated.");
@@ -84,32 +68,41 @@ const FavouritesProvider = ({ children }) => {
       return;
     }
 
-    const favouriteId = `${item.id}`; // Create a unique ID based on product ID and size
-    const itemRef = doc(db, "users", userId, "Favourites", favouriteId); // Use doc() to construct a valid document reference
+    const favouriteId = `${item.id}_${item.size}`; // Unique ID based on product ID and size
+    const itemRef = doc(db, "users", userId, "Favourites", favouriteId);
 
     try {
       await setDoc(itemRef, item); // Save the item to Firestore
-      setFavouriteItems((prev) => [...prev, item]);
+      setFavouriteItems((prev) => [...prev, { id: favouriteId, ...item }]); // Update state
       console.log("Item added to favourites:", item);
     } catch (error) {
-      console.error("Error saving favourite item:", error);
+      console.error("Error adding favourite item:", error);
     }
   };
 
+  // Remove a single favourite item
   const removeFavouriteItem = async (id) => {
-    if (!userId) return;
+    if (!userId) {
+      console.error("User not authenticated.");
+      return;
+    }
 
     try {
       const itemRef = doc(db, "users", userId, "Favourites", id);
       await deleteDoc(itemRef); // Remove from Firestore
       setFavouriteItems((prevItems) => prevItems.filter((i) => i.id !== id));
+      console.log("Item removed from favourites:", id);
     } catch (error) {
       console.error("Error removing favourite item:", error);
     }
   };
 
+  // Remove all favourites
   const removeAllFavourites = async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.error("User not authenticated.");
+      return;
+    }
 
     try {
       const favouritesCollection = collection(
@@ -118,15 +111,16 @@ const FavouritesProvider = ({ children }) => {
         userId,
         "Favourites"
       );
-      const snapshot = await getDoc(favouritesCollection);
-      const batch = db.batch();
+      const snapshot = await getDocs(favouritesCollection);
+      const batch = writeBatch(db);
 
       snapshot.docs.forEach((doc) => {
         batch.delete(doc.ref);
       });
 
-      await batch.commit(); // Batch delete all documents
-      setFavouriteItems([]);
+      await batch.commit(); // Commit batch delete
+      setFavouriteItems([]); // Clear local state
+      console.log("All favourites removed.");
     } catch (error) {
       console.error("Error removing all favourites:", error);
     }
@@ -139,7 +133,6 @@ const FavouritesProvider = ({ children }) => {
         addFavourite,
         removeFavouriteItem,
         removeAllFavourites,
-        notification,
       }}
     >
       {children}

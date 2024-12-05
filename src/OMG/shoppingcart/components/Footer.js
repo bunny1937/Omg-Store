@@ -10,21 +10,14 @@ export default function Footer() {
             Company<span>logo</span>
           </h3>
 
-          <p className="footer-links">
-            <a href="#" className="link-1">
-              Home
-            </a>
-
-            <a href="#">Blog</a>
-
-            <a href="#">Pricing</a>
-
-            <a href="#">About</a>
-
-            <a href="#">Faq</a>
-
-            <a href="#">Contact</a>
-          </p>
+          <h3 className="footer-links">
+            <p className="link-1">Home</p>
+            <p>Blog</p>
+            <p>Pricing</p>
+            <p>About</p>
+            <p>Faq</p>
+            <p>Contact</p>
+          </h3>
 
           <p className="footer-company-name">Company Name © 2015</p>
         </div>
@@ -58,18 +51,18 @@ export default function Footer() {
           </p>
 
           <div className="footer-icons">
-            <a href="#">
+            <p>
               <i className="fa fa-facebook"></i>
-            </a>
-            <a href="#">
+            </p>
+            <p>
               <i className="fa fa-twitter"></i>
-            </a>
-            <a href="#">
+            </p>
+            <p>
               <i className="fa fa-linkedin"></i>
-            </a>
-            <a href="#">
+            </p>
+            <p>
               <i className="fa fa-github"></i>
-            </a>
+            </p>
           </div>
         </div>
       </footer>

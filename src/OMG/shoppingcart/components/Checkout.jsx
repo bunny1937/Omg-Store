@@ -4,23 +4,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import cartContext from "../context/cartContext";
-import { firestore, auth, db } from "../../db/Firebase";
-import {
-  collection,
-  doc,
-  setDoc,
-  getDocs,
-  getDoc,
-  addDoc,
-  Timestamp,
-} from "firebase/firestore";
+import { firestore, db } from "../../db/Firebase";
+import { collection, doc, getDocs, getDoc, addDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import "./Checkout.css";
 
-const Checkout = (onClose) => {
+const Checkout = () => {
   const checkoutRef = useRef(null);
-  const navigate = useNavigate(); // For navigation after order is saved
+  const navigate = useNavigate();
   const { cartItems, updateCartItem } = useContext(cartContext);
   const [userId, setUserId] = useState(null);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -29,9 +21,8 @@ const Checkout = (onClose) => {
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [showCouponInput, setShowCouponInput] = useState(false);
-  const [totalAmount] = useState(0);
 
-  const [userInfo, setUserInfo] = useState(null); // State to hold user info
+  const [userInfo, setUserInfo] = useState(null);
   const [shippingInfo, setShippingInfo] = useState({
     city: "",
     flat: "",
@@ -46,27 +37,25 @@ const Checkout = (onClose) => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("User is authenticated:", user.uid); // Log the authenticated user UID
         setUserId(user.uid);
       } else {
-        alert("User not authenticated. Please log in.");
       }
     });
 
-    return () => unsubscribe(); // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    // Animate page entry
+    const element = checkoutRef.current; // Capture ref value
+
     gsap.fromTo(
-      checkoutRef.current,
+      element,
       { x: "100%", opacity: 0 },
       { x: "0%", opacity: 1, duration: 0.8, ease: "power3.out" }
     );
 
     return () => {
-      // Optional: Cleanup or reverse animation on unmount
-      gsap.to(checkoutRef.current, {
+      gsap.to(element, {
         x: "-100%",
         opacity: 0,
         duration: 0.6,
@@ -77,48 +66,21 @@ const Checkout = (onClose) => {
 
   useEffect(() => {
     if (userId) {
-      // Fetch user data from Firestore
       const fetchUserInfo = async () => {
         try {
-          console.log("Fetching user info for UID:", userId);
           const userRef = doc(firestore, "users", userId);
           const userDoc = await getDoc(userRef);
           if (userDoc.exists()) {
-            console.log("User info fetched:", userDoc.data()); // Log the fetched user info
-            setUserInfo(userDoc.data()); // Set the user data into state
+            setUserInfo(userDoc.data());
           } else {
-            console.log("No user data found.");
           }
-        } catch (error) {
-          console.error("Error fetching user info:", error);
-        }
+        } catch (error) {}
       };
       fetchUserInfo();
     }
   }, [userId]);
-  // Function to save the order to Firestore
-  // const saveOrder = async () => {
-  //   if (userInfo && selectedAddress) {
-  //     const orderRef = collection(firestore, "users", userId, "orders");
-  //     const newOrder = {
-  //       cartItems,
-  //       shippingInfo: selectedAddress,
-  //       totalAmount: cartTotal,
-  //       orderCreatedAt: Timestamp.fromDate(new Date()),
-  //     };
-  //     try {
-  //       await addDoc(orderRef, newOrder);
-  //       navigate("/Payment");
-  //     } catch (error) {
-  //       console.error("Error saving order:", error);
-  //     }
-  //   } else {
-  //     alert("Please select an address and ensure the cart is not empty.");
-  //   }
-  // };
 
   useEffect(() => {
-    // Fetch addresses only if userId is available
     if (userId) {
       const fetchAddresses = async () => {
         try {
@@ -135,9 +97,8 @@ const Checkout = (onClose) => {
       };
       fetchAddresses();
     }
-  }, [userId]); // Run when userId is updated
+  }, [userId]);
   useEffect(() => {
-    // Fetch saved addresses if userId is available
     const fetchSavedAddresses = async () => {
       if (userId) {
         const addressesRef = collection(
@@ -168,20 +129,16 @@ const Checkout = (onClose) => {
         userId,
         "ShippingInfo"
       );
-
-      // Include userInfo in the order details
       const orderData = {
         ...shippingInfo,
       };
 
-      console.log("Submitting order data:", orderData); // Log the data before submitting
-
       try {
         await addDoc(userOrderRef, orderData);
         alert("Shipping information saved successfully.");
-        setShowForm(false); // Hide form after saving
-        setShippingInfo({}); // Clear form fields
-        setSavedAddresses((prev) => [...prev, { ...orderData }]); // Add new address to local state
+        setShowForm(false);
+        setShippingInfo({});
+        setSavedAddresses((prev) => [...prev, { ...orderData }]);
       } catch (error) {
         console.error("Error saving order data:", error);
       }
@@ -190,27 +147,24 @@ const Checkout = (onClose) => {
     }
   };
   const handleAddressSelection = (addressId) => {
-    console.log("Selected Address ID:", addressId); // Log selected address ID
     const address = savedAddresses.find((addr) => addr.id === addressId);
-    console.log("Found Address:", address); // Log the found address
     if (address) {
       setSelectedAddress(address);
-      setSelectedAddressId(addressId); // Set the selected address ID
-      setShowAddressDetails(true); // Show form on selection
+      setSelectedAddressId(addressId);
+      setShowAddressDetails(true);
     } else {
-      setShowAddressDetails(false); // Hide form if address not found
+      setShowAddressDetails(false);
     }
   };
 
-  // Step 4: Cancel Address Selection and Reset the Select Dropdown
   const handleCancelSelection = () => {
     setSelectedAddress(null);
-    setShowAddressDetails(false); // Hide form when canceling selection
-    setSelectedAddressId(""); // Reset the selected address ID
+    setShowAddressDetails(false);
+    setSelectedAddressId("");
   };
 
   const handleAddAddressClick = () => {
-    setShowForm(!showForm); // Toggle form visibility
+    setShowForm(!showForm);
   };
   const handleCouponToggle = () => {
     setShowCouponInput(!showCouponInput);
@@ -431,7 +385,7 @@ const Checkout = (onClose) => {
                 {address.name}, {address.number},{address.flat}.........
               </div>
             ))}
-            {selectedAddress && (
+            {showAddressDetails && (
               <div className="address-details-form">
                 <h4>Address Details</h4>
                 <div>

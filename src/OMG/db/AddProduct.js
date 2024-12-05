@@ -18,7 +18,6 @@ export const AddProducts = () => {
   const [Category, setProductCategory] = useState("");
   const [quantity, setProductQuantity] = useState(0);
   const [productImgs, setProductImgs] = useState([]);
-  const [error, setError] = useState("");
   const [Gender, setProductGender] = useState("");
   const [progress, setProgress] = useState(0);
 
@@ -32,10 +31,8 @@ export const AddProducts = () => {
 
     if (validFiles.length === selectedFiles.length) {
       setProductImgs(validFiles);
-      setError("");
     } else {
       setProductImgs([]);
-      setError("Please select valid image types (jpg or png) only.");
     }
   };
 
@@ -66,7 +63,6 @@ export const AddProducts = () => {
         storageRef = ref(storage, `/Products/Hoodies/${productImgs.name}`);
         break;
       default:
-        setError("Please select a valid product category");
         return;
     }
 
@@ -130,11 +126,10 @@ export const AddProducts = () => {
       setProductPrice(0);
       setProductImgs([]);
       setProductQuantity(0);
-      setError("");
       setProgress([]);
       document.getElementById("file").value = ""; // Clear file input
-    } catch (error) {
-      setError(`Error: ${error.message}`);
+    } catch (err) {
+      console.error(`Error: ${err.message}`);
     }
   };
 

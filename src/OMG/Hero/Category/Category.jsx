@@ -1,75 +1,106 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import img1 from "../../shoppingcart/components/pages/photos/parallax/man-wearing-white-shirt-with-tattoo-his-arm-words-hes-man-left_1045176-14545-transformed.jpeg";
+import img2 from "../../shoppingcart/components/pages/photos/parallax/redicul-pict-hhmrD_gNNA4-unsplash.jpg";
+import img3 from "../../shoppingcart/components/pages/photos/parallax/premium_photo-1690341214258-18cb88438805-transformed.jpeg";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./Category.css";
 gsap.registerPlugin(ScrollTrigger);
 
 const Category = () => {
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [categories, setCategories] = useState([
-    "Hoodies",
-    "Oversize",
-    "Pants",
-    "Tshirts",
-  ]);
+  const sectionRef = useRef(null);
   const navigate = useNavigate();
-  const location = useLocation();
-  const scrollContainerRef = useRef(null);
-  const wrapperRef = useRef(null);
 
-  useEffect(() => {
-    // Reset active category when navigating back
-    setActiveCategory(null);
-  }, [location.key]);
-
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    const wrapper = wrapperRef.current;
-
-    // Calculate the total scrollable width
-    const totalWidth = scrollContainer.scrollWidth - wrapper.offsetWidth;
-
-    // Create horizontal scroll effect using GSAP
-    const animation = gsap.to(scrollContainer, {
-      x: -totalWidth, // Move horizontally based on the total width
-      ease: "none",
-      scrollTrigger: {
-        trigger: wrapper, // Attach ScrollTrigger to the wrapper
-        start: "top top", // Start when wrapper hits the viewport top
-        end: () => `+=${totalWidth}`, // Total scroll distance
-        scrub: 1, // Smooth scroll
-        pin: true, // Pin the wrapper during scroll
-      },
-    });
-
-    // Cleanup GSAP triggers on unmount
-    return () => {
-      animation.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, []);
-
-  const handleCategoryClick = (category) => {
-    setActiveCategory(category);
+  const handleNavigate = (category) => {
     navigate(`/category/${category}`);
   };
 
+  useEffect(() => {
+    const sections = sectionRef.current.querySelectorAll(".lenis-category");
+
+    sections.forEach((section) => {
+      gsap.fromTo(
+        section.querySelector(".lenis-content"),
+        { y: 50, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 80%",
+            end: "top 50%",
+            scrub: true,
+          },
+        }
+      );
+
+      gsap.fromTo(
+        section.querySelector(".illustration"),
+        { scale: 0.9, opacity: 0 },
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 1,
+          ease: "elastic.out(1, 0.5)",
+          scrollTrigger: {
+            trigger: section,
+            start: "top 80%",
+            end: "top 50%",
+            scrub: true,
+          },
+        }
+      );
+    });
+  }, []);
+
   return (
-    <div className="horizontal-scroll-wrapper" ref={wrapperRef}>
-      <div className="scroll-container" ref={scrollContainerRef}>
-        {categories.map((category, index) => (
-          <div
-            key={index}
-            className={`category-box ${
-              activeCategory === category ? "active" : ""
-            }`}
-          >
-            <button onClick={() => handleCategoryClick(category)}>
-              <h2>{category}</h2>
-            </button>
-          </div>
-        ))}
+    <div ref={sectionRef} className="lenis-container">
+      {/* Oversized T-Shirts */}
+      <div
+        className="lenis-category"
+        style={{ backgroundImage: `url(${img1})` }}
+      >
+        <div className="illustration oversized"></div>
+        <div className="lenis-content">
+          <h1>Oversized T-Shirts</h1>
+          <p>Bold Moves. Bigger Fits.</p>
+          <button onClick={() => handleNavigate("Oversize")}>
+            Explore Oversized T-Shirts
+          </button>
+        </div>
+      </div>
+
+      {/* Hoodies */}
+      <div
+        className="lenis-category"
+        style={{ backgroundImage: `url(${img2})` }}
+      >
+        <div className="illustration hoodies"></div>
+        <div className="lenis-content">
+          <h1>Hoodies</h1>
+          <p>Layer Up in Style.</p>
+          <button onClick={() => handleNavigate("Hoodies")}>
+            Explore Hoodies
+          </button>
+        </div>
+      </div>
+
+      {/* T-Shirts */}
+      <div
+        className="lenis-category"
+        style={{ backgroundImage: `url(${img3})` }}
+      >
+        <div className="illustration tshirts"></div>
+        <div className="lenis-content">
+          <h1>T-Shirts</h1>
+          <p>Effortless. Everyday.</p>
+          <button onClick={() => handleNavigate("Tshirts")}>
+            Explore T-Shirts
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -131,6 +131,7 @@ svg {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .product_card h3 {

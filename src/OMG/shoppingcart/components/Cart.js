@@ -15,7 +15,7 @@ const Cart = () => {
     decrementItem,
     isCartOpen,
     cartItems,
-    state,
+    clearCart,
     dispatch,
   } = useContext(cartContext);
   const cartRef = useRef(null);
@@ -148,6 +148,15 @@ const Cart = () => {
                 <small>Total:</small>
                 <b>₹ {cartTotal.toLocaleString()}</b>
               </h3>
+              {/* Clear Cart Button */}
+              <button
+                type="button"
+                className="clear_cart_btn"
+                onClick={clearCart} // Trigger clearCart function here
+                disabled={cartQuantity === 0}
+              >
+                Clear Cart
+              </button>
               <Link to={"/Checkout"}>
                 <button
                   type="button"

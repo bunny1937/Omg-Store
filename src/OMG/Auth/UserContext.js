@@ -1,6 +1,4 @@
 import React, { createContext, useState, useEffect } from "react";
-import { auth, db } from "../db/Firebase"; // Assuming you have Firebase set up
-
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {

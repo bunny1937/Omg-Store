@@ -24,10 +24,6 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [categories, setCategories] = useState([]); // Dynamic categories
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen((prev) => !prev);
-  };
-
   const logout = () => {
     localStorage.clear();
     setUser(null); // Clear the user context state
@@ -204,16 +200,7 @@ const Header = () => {
                 <p> Contact</p>
               </Link>
             </div>
-            <div className="header-links">
-              <Link to={"/Favourites"}>
-                <div className="fav-icon">
-                  {favouriteQuantity >= 1 && (
-                    <span className="badge">{favouriteQuantity}</span>
-                  )}
-                </div>
-                <p className="favourites-text">Favourites</p>
-              </Link>
-            </div>
+
             {/* <>
             <button onClick={() => setShowComponent1(true)}>Component1</button>
             {showComponent1 && (
@@ -285,6 +272,16 @@ const Header = () => {
               )}
             </ul>
           )}
+        </div>
+        <div className="header-links">
+          <Link to={"/Favourites"}>
+            <div className="fav-icon">
+              {favouriteQuantity >= 1 && (
+                <span className="badge">{favouriteQuantity}</span>
+              )}
+            </div>
+            <p className="favourites-text">Favourites</p>
+          </Link>
         </div>
 
         <div className="header-links">

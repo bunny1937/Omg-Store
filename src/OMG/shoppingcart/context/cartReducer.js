@@ -1,10 +1,3 @@
-const calculateItemTotal = (cartItems) => {
-  return cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
-};
-
 const cartReducer = (state, action) => {
   switch (action.type) {
     case "ADD_TO_CART": {

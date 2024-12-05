@@ -51,7 +51,7 @@ export default function Burger() {
               <Link
                 key={index}
                 data={{ ...data, index }}
-                isActive={selectedIndicator == data.href}
+                isActive={selectedIndicator === data.href}
                 setSelectedIndicator={setSelectedIndicator}
               ></Link>
             );

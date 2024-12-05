@@ -25,6 +25,43 @@
   color: #4a573e;
   gap: 2rem;
 }
+.img-section {
+  display: flex;
+  width: 55%;
+  gap: 4rem;
+}
+.thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 17%;
+}
+
+.thumbnail {
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.thumbnail.active {
+  border: 2px solid #007bff;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.main-image {
+  width: 70%;
+}
+
+.main-image img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
 
 .description-box {
   flex: 1;
@@ -47,30 +84,6 @@
   cursor: pointer;
   padding: 10px;
   background-color: #f5f5f5;
-}
-
-.img-section {
-  width: 45%;
-  height: 100vh;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
-  margin-top: 1.5rem;
-}
-
-.grid-img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  transition: transform 0.3s ease;
-}
-.grid-img:hover {
-  transform: scale(1.05);
 }
 
 .details-section {
@@ -232,10 +245,31 @@
 }
 @media (max-width: 970px) {
   .img-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 50%;
+    padding-top: 2rem;
+
+    gap: 2rem;
+  }
+  .thumbnails {
+    flex-direction: row;
+    width: 40%;
+    order: 2;
+  }
+  .main-image {
+    width: 90%;
+    order: 1;
   }
   .details-section {
     width: 45%;
+  }
+  .feature-container {
+    max-width: 900px;
+  }
+  .size-btn {
+    padding: 8px 12px;
   }
 }
 @media (max-width: 776px) and (min-width: 680px) {
@@ -243,8 +277,30 @@
     width: 140px;
     padding: 5px;
   }
+
   .size-btn {
-    padding: 6px 12px;
+    padding: 4px 6px;
+  }
+  .quantity > button {
+    font-size: 1rem;
+    width: 2rem;
+    height: 2rem;
+  }
+  .btn1 {
+    height: 3rem;
+    font-size: 1.4rem;
+  }
+  .details-container {
+    gap: 1rem;
+  }
+  .img-section {
+    padding-top: 1rem;
+  }
+  .details-actions > h2 {
+    font-size: 2.7rem;
+  }
+  .details-actions > p {
+    font-size: 1.7rem;
   }
 }
 /* Responsive Design */
@@ -258,47 +314,50 @@
   .details-section {
     width: 100%;
   }
-
+  .img-section {
+    width: 100%;
+  }
+  .thumbnails {
+    flex-direction: row;
+    width: 30%;
+    order: 2;
+  }
+  .main-image {
+    width: 100%;
+    order: 1;
+  }
   .details-actions > h2 {
-    font-size: 2.5rem;
+    font-size: 3rem;
+    font-weight: 600;
   }
   .details-actions > h3 {
     font-size: 1.8rem;
   }
   .details-actions > p {
-    font-size: 1.5rem;
+    font-size: 2rem;
+    margin: 0.5rem 0;
   }
 
   .btn1 {
     width: 100%;
   }
-
-  .img-section {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-  }
-  .img-section img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-  }
-
   .quantity > button,
   .quantity > p {
     font-size: 1.5rem;
   }
   .feature-container {
-    width: 80%;
-    margin: 0;
+    max-width: 1100px;
+  }
+  .feature-item {
+    width: 200px;
   }
 }
 @media (max-width: 484px) and (min-width: 400px) {
   .feature-container {
-    width: 100%;
+    max-width: 1000px;
   }
   .feature-item {
-    padding: 0;
+    width: 180px;
   }
 }
 @media (max-width: 404px) and (min-width: 300px) {
@@ -318,6 +377,9 @@
   }
 }
 @media (max-width: 319px) {
+  .details {
+    padding: 0.5rem;
+  }
   .details-actions > h2 {
     font-size: 2.2rem;
   }
@@ -326,8 +388,12 @@
   }
   .feature-item {
     padding: 0;
-    width: 130px;
+    width: 110px;
     font-size: 13px;
+  }
+  .description-box {
+    flex: 1 1;
+    min-width: auto;
   }
 }
 /* Responsive Design */

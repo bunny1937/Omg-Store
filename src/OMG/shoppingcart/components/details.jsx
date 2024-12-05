@@ -24,11 +24,12 @@ const Details = () => {
   const [isAdded, setIsAdded] = useState(false);
   const [isFavourite, setIsFavourite] = useState(false);
   const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-
   const { addItem } = useContext(cartContext);
   const { addFavourite } = useContext(FavouritesContext);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [shippingOpen, setShippingOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null); // For main image
+
   // Fetch product based on id
   useEffect(() => {
     if (id) {
@@ -38,7 +39,9 @@ const Details = () => {
       getDoc(productRef)
         .then((doc) => {
           if (doc.exists()) {
-            setProduct(doc.data());
+            const data = doc.data();
+            setProduct(data);
+            setSelectedImage(data.ImgUrls[0]); // Set the first image as default
           } else {
             console.log("Product not found!");
           }
@@ -87,6 +90,7 @@ const Details = () => {
     };
 
     addFavourite(favouriteItem);
+    setIsFavourite(true);
   };
 
   const handleSizeSelect = (size) => {
@@ -110,28 +114,45 @@ const Details = () => {
       setShippingOpen(!shippingOpen);
     }
   };
-  const settings = {
-    infinite: true,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    arrows: true,
-    cssEase: "linear",
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
+
+  const handleThumbnailClick = (imgUrl) => {
+    setSelectedImage(imgUrl); // Update main image when thumbnail is clicked
   };
+
+  // const settings = {
+  //   infinite: true,
+  //   autoplay: true,
+  //   autoplaySpeed: 3000,
+  //   arrows: true,
+  //   cssEase: "linear",
+  //   speed: 500,
+  //   slidesToShow: 1,
+  //   slidesToScroll: 1,
+  // };
   return (
     <>
       <div className="details">
         <div className="details-container">
           <div className="img-section">
-            <Slider {...settings}>
+            {/* Thumbnails Section */}
+            <div className="thumbnails">
               {ImgUrls.map((url, index) => (
-                <div key={index}>
-                  <img src={url} alt={`product-img-${index}`} />
+                <div
+                  key={index}
+                  className={`thumbnail ${
+                    selectedImage === url ? "active" : ""
+                  }`}
+                  onClick={() => handleThumbnailClick(url)}
+                >
+                  <img src={url} alt={`Thumbnail ${index}`} />
                 </div>
               ))}
-            </Slider>
+            </div>
+
+            {/* Main Image Section */}
+            <div className="main-image">
+              <img src={selectedImage} alt="Selected product" />
+            </div>
           </div>
           <div className="details-section">
             <div className="details-actions">
@@ -185,11 +206,11 @@ const Details = () => {
               </button>
               <button
                 type="button"
-                className={`btn1 ${isFavourite ? "favourited" : ""}`}
+                className={`btn1 ${isFavourite ? "Added !" : ""}`}
                 onClick={handleAddToFavourites}
                 disabled={!selectedSize}
               >
-                {isFavourite ? "Favourited" : "Add to favourites"}
+                {isFavourite ? "Added !" : "Favourite ?"}
               </button>
             </div>
             <div className="description-box">

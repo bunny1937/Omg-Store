@@ -1,8 +1,7 @@
 // App.js
 import "./App.css";
-import React, { useState } from "react";
-import { ReactLenis, useLenis } from "lenis/react";
-
+import React from "react";
+import { ReactLenis } from "lenis/react";
 import Header from "./OMG/shoppingcart/components/Header";
 import Home from "./OMG/shoppingcart/pages/Home";
 import Heroui from "./OMG/Hero/Heroui";
@@ -18,16 +17,11 @@ import { ParallaxProvider } from "react-scroll-parallax";
 import "./OMG/shoppingcart/index.css";
 import { ProtectedRoute } from "./OMG/shoppingcart/components/protectRoute/ProtectedRoute";
 import AdminDash from "./OMG/Auth/AdminDash";
-import { useLocation } from "react-router-dom";
 import { UserProvider } from "./OMG/Auth/UserContext";
 import Checkout from "./OMG/shoppingcart/components/Checkout";
 import Payment from "./OMG/shoppingcart/components/Payment";
-import Category from "./OMG/Hero/Category/Category";
 import CategoryPage from "./OMG/Hero/Category/Categorypage";
 function App() {
-  const lenis = useLenis(({ scroll }) => {
-    // called every scroll
-  });
   return (
     <ReactLenis root>
       <React.StrictMode>

@@ -69,7 +69,17 @@
   gap: 2.2rem;
   margin-bottom: 1.5rem;
 }
-
+.cart_items_img {
+  margin-top: 1rem;
+  width: 10rem;
+  height: 10rem;
+  object-fit: cover;
+}
+.cart_items_img img {
+  width: 9rem;
+  height: 8.5rem;
+  object-fit: contain;
+}
 .cart_items_info .price {
   font-weight: 600;
   margin-top: 0.5rem;

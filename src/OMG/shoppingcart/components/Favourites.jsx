@@ -12,7 +12,7 @@ const Favourites = () => {
       <h2>Favourites</h2>
       {notification && <div className="notification">{notification}</div>}
       <ul className="fav-list">
-        {favouriteItems.map((item, id) => (
+        {favouriteItems.map((item) => (
           <>
             <li className="fav-list-li" key={item.id}>
               <img src={item.img} alt="item-img" />

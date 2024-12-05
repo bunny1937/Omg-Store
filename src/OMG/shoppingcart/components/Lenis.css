@@ -1,3 +1,10 @@
+/* Lenis.css
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+}
+
 .lenis-container {
   overflow-x: hidden;
 }
@@ -33,7 +40,7 @@
   text-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
 }
 
-.lenis-content button {
+button {
   padding: 10px 20px;
   font-size: 1.2rem;
   background: linear-gradient(90deg, #ff7eb3, #ff758c);
@@ -44,7 +51,7 @@
   transition: all 0.3s ease;
 }
 
-.lenis-content button:hover {
+button:hover {
   transform: scale(1.1);
   box-shadow: 0 8px 20px rgba(255, 117, 140, 0.5);
 }
@@ -58,7 +65,7 @@
   z-index: 1;
 }
 
-/* Parallax and overlay effects */
+
 .lenis-category::before {
   content: "";
   position: absolute;
@@ -68,4 +75,4 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.203);
   z-index: 1;
-}
+} */
