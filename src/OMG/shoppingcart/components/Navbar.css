@@ -325,26 +325,7 @@ input.nosubmit {
 .submenu-link:hover {
   color: #1b216b;
 }
-@media screen and (min-width: 1241px) {
-  .header-links > input {
-    width: 25rem;
-  }
-  .nav-menu {
-    width: 40vw;
-  }
-  .search-join {
-    margin: 0 2rem;
-  }
-  .bag-icon,
-  .fav-icon,
-  .user-icon {
-    position: static;
-    margin-left: 1.5rem;
-  }
-  .dropdown-menu {
-    right: 1rem;
-  }
-}
+
 /* Responsive Design */
 @media (min-width: 768px) {
 }
@@ -371,36 +352,37 @@ input.nosubmit {
 }
 @media screen and (max-width: 1240px) and (min-width: 960px) {
   .header-links > input {
-    width: 20rem;
+    width: auto;
   }
   .nav-menu {
-    width: 45vw;
+    width: 48vw;
   }
   .search-join {
-    width: auto;
+    width: 100%;
     margin: 0 1rem;
   }
   .bag-icon {
     position: absolute;
     top: 50%;
-    right: 1rem;
+    right: 1.6rem; /* increased spacing */
     transform: translateY(-50%);
   }
   .fav-icon {
     position: absolute;
     top: 50%;
-    right: 4rem;
+    right: 5rem; /* increased spacing */
     transform: translateY(-50%);
   }
   .user-icon {
     position: absolute;
     top: 50%;
-    right: 7rem;
+    right: 7rem; /* increased spacing */
     transform: translateY(-50%);
   }
   .dropdown-menu {
-    top: 4rem;
-    right: 6.5rem;
+    position: absolute; /* Position dropdown absolute to its container */
+    top: 4rem; /* Adjust as needed */
+    right: 7.4rem;
   }
 }
 @media screen and (max-width: 960px) {

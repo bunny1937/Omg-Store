@@ -5,18 +5,16 @@ import {
   setPersistence,
   browserSessionPersistence,
 } from "firebase/auth";
-
 import {
   getFirestore,
-  addDoc,
   collection,
+  addDoc,
   getDocs,
   doc,
   setDoc,
 } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-
+// Firebase configuration from environment variables
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
   authDomain: process.env.REACT_APP_AUTH_DOMAIN,
@@ -28,7 +26,9 @@ const firebaseConfig = {
   databaseURL: process.env.REACT_APP_DATABASE_URL,
 };
 
-// Initialize Firebase
+// Log the configuration to verify correctness during debugging
+
+// Initialize Firebase app
 const firebaseApp = initializeApp(firebaseConfig);
 const storage = getStorage(firebaseApp);
 const storageRef = ref(storage);
@@ -37,7 +37,10 @@ const auth = getAuth(firebaseApp);
 
 const db = getFirestore(firebaseApp); // Corrected import
 setPersistence(auth, browserSessionPersistence);
+console.log(firebaseConfig);
+console.log(storage);
 
+// Export Firebase services and Firestore utilities
 export {
   firebaseApp,
   storage,

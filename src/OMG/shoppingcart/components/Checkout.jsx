@@ -1,126 +1,84 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiShoppingCart, FiCreditCard, FiPackage } from "react-icons/fi";
 import { FaPlus, FaMinus } from "react-icons/fa";
-import cartContext from "../context/cartContext";
-import { firestore, db } from "../../db/Firebase";
+import { Link, useNavigate } from "react-router-dom";
 import { collection, doc, getDocs, getDoc, addDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-
+import { firestore, db } from "../../db/Firebase";
+import cartContext from "../context/cartContext";
 import "./Checkout.css";
 
-const Checkout = () => {
-  const checkoutRef = useRef(null);
-  const navigate = useNavigate();
-  const { cartItems, updateCartItem } = useContext(cartContext);
+const PremiumCheckout = () => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [userId, setUserId] = useState(null);
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [showAddressDetails, setShowAddressDetails] = useState(false);
-  const [savedAddresses, setSavedAddresses] = useState([]);
-  const [selectedAddressId, setSelectedAddressId] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [showCouponInput, setShowCouponInput] = useState(false);
-
   const [userInfo, setUserInfo] = useState(null);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedAddressId, setSelectedAddressId] = useState(null); // Added state for address ID
+  const [showAddressForm, setShowAddressForm] = useState(false);
   const [shippingInfo, setShippingInfo] = useState({
-    city: "",
-    flat: "",
-    locality: "",
     name: "",
     number: "",
+    flat: "",
+    street: "",
+    locality: "",
+    city: "",
     pinCode: "",
     state: "",
-    street: "",
   });
+  const [coupon, setCoupon] = useState("");
+  const navigate = useNavigate();
+  const { cartItems, updateCartItem } = useContext(cartContext);
+
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserId(user.uid);
-      } else {
       }
     });
-
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    const element = checkoutRef.current; // Capture ref value
-
-    gsap.fromTo(
-      element,
-      { x: "100%", opacity: 0 },
-      { x: "0%", opacity: 1, duration: 0.8, ease: "power3.out" }
-    );
-
-    return () => {
-      gsap.to(element, {
-        x: "-100%",
-        opacity: 0,
-        duration: 0.6,
-        ease: "power3.in",
-      });
-    };
-  }, []);
-
-  useEffect(() => {
     if (userId) {
-      const fetchUserInfo = async () => {
-        try {
-          const userRef = doc(firestore, "users", userId);
-          const userDoc = await getDoc(userRef);
-          if (userDoc.exists()) {
-            setUserInfo(userDoc.data());
-          } else {
-          }
-        } catch (error) {}
-      };
       fetchUserInfo();
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (userId) {
-      const fetchAddresses = async () => {
-        try {
-          const addressesRef = collection(db, "users", userId, "ShippingInfo");
-          const snapshot = await getDocs(addressesRef);
-          const addresses = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setSavedAddresses(addresses);
-        } catch (error) {
-          console.error("Error fetching addresses:", error);
-        }
-      };
       fetchAddresses();
     }
   }, [userId]);
-  useEffect(() => {
-    const fetchSavedAddresses = async () => {
-      if (userId) {
-        const addressesRef = collection(
-          firestore,
-          "users",
-          userId,
-          "ShippingInfo"
-        );
-        const snapshot = await getDocs(addressesRef);
-        setSavedAddresses(
-          snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-        );
-      }
-    };
-    fetchSavedAddresses();
-  }, [userId]);
 
-  const handleInputChange = (e) => {
-    setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
+  const fetchUserInfo = async () => {
+    try {
+      const userRef = doc(firestore, "users", userId);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        setUserInfo(userDoc.data());
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
   };
 
-  const handleSubmit = async (e) => {
+  const fetchAddresses = async () => {
+    try {
+      const addressesRef = collection(db, "users", userId, "ShippingInfo");
+      const snapshot = await getDocs(addressesRef);
+      const addresses = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setSavedAddresses(addresses);
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+    }
+  };
+
+  const handleQuantityChange = (item, newQuantity) => {
+    updateCartItem(item.id, newQuantity);
+  };
+
+  const handleAddressSubmit = async (e) => {
     e.preventDefault();
     if (userId) {
       const userOrderRef = collection(
@@ -129,55 +87,27 @@ const Checkout = () => {
         userId,
         "ShippingInfo"
       );
-      const orderData = {
-        ...shippingInfo,
-      };
-
       try {
-        await addDoc(userOrderRef, orderData);
+        await addDoc(userOrderRef, shippingInfo);
         alert("Shipping information saved successfully.");
-        setShowForm(false);
-        setShippingInfo({});
-        setSavedAddresses((prev) => [...prev, { ...orderData }]);
+        setShowAddressForm(false);
+        fetchAddresses();
+        setShippingInfo({
+          name: "",
+          number: "",
+          flat: "",
+          street: "",
+          locality: "",
+          city: "",
+          pinCode: "",
+          state: "",
+        });
       } catch (error) {
         console.error("Error saving order data:", error);
       }
-    } else {
-      console.log("User info or user ID is missing, cannot submit order.");
-    }
-  };
-  const handleAddressSelection = (addressId) => {
-    const address = savedAddresses.find((addr) => addr.id === addressId);
-    if (address) {
-      setSelectedAddress(address);
-      setSelectedAddressId(addressId);
-      setShowAddressDetails(true);
-    } else {
-      setShowAddressDetails(false);
     }
   };
 
-  const handleCancelSelection = () => {
-    setSelectedAddress(null);
-    setShowAddressDetails(false);
-    setSelectedAddressId("");
-  };
-
-  const handleAddAddressClick = () => {
-    setShowForm(!showForm);
-  };
-  const handleCouponToggle = () => {
-    setShowCouponInput(!showCouponInput);
-  };
-  const cartTotal = cartItems
-    .map((item) => item.price * item.quantity)
-    .reduce((prevValue, currValue) => prevValue + currValue, 0);
-
-  const handleQuantityChange = (item, newQuantity) => {
-    updateCartItem(item.id, newQuantity);
-  };
-
-  // Save the order details to Firestore and navigate to payment page
   const handlePayClick = async () => {
     if (userId && selectedAddress && cartItems.length > 0) {
       try {
@@ -185,7 +115,10 @@ const Checkout = () => {
         const newOrder = {
           cartItems,
           shippingInfo: selectedAddress,
-          totalAmount: cartTotal,
+          totalAmount: cartItems.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          ),
           orderCreatedAt: new Date(),
           userInfo: {
             email: userInfo.email,
@@ -195,10 +128,8 @@ const Checkout = () => {
             userId: userId,
           },
         };
-
-        console.log("Saving order to Firestore:", newOrder); // Debugging log
-        await addDoc(orderRef, newOrder); // Save order to Firestore
-        navigate("/Payment"); // Navigate to payment page
+        await addDoc(orderRef, newOrder);
+        navigate("/Payment");
       } catch (error) {
         console.error("Error saving order:", error);
       }
@@ -207,277 +138,342 @@ const Checkout = () => {
     }
   };
 
-  return (
-    <div className="checkout" ref={checkoutRef}>
-      <div className="checkout-container">
-        <div className="cart-items">
-          {cartItems.map((item, index) => (
-            <motion.div
-              className="cart-item"
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <figure className="cart-item-img">
-                <img src={item.Img} alt={item.Name} />
-              </figure>
-              <div className="cart-item-info">
-                <h2>{item.Name}</h2>
-                <h3>Category: {item.Category}</h3>
-                <h4>₹ {item.price.toLocaleString()}</h4>
-                <h3>Size : {item.size}</h3>
-                <div className="cart-item-pricing">
-                  <div className="quantity-controls">
-                    <button
-                      onClick={() =>
-                        handleQuantityChange(item, item.quantity - 1)
-                      }
-                      disabled={item.quantity <= 1}
-                    >
-                      <FaMinus />
-                    </button>
-                    <span>{item.quantity}</span>
-                    <button
-                      onClick={() =>
-                        handleQuantityChange(item, item.quantity + 1)
-                      }
-                    >
-                      <FaPlus />
-                    </button>
-                  </div>
-                  <h3>₹ {(item.price * item.quantity).toLocaleString()}</h3>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+  const CartSection = () => (
+    <motion.div
+      className="cart-section"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+    >
+      <h2>Your Cart</h2>
+      {cartItems.map((item) => (
+        <motion.div
+          className="cart-item"
+          key={item.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <img src={item.Img} alt={item.Name} className="cart-item-img" />
+          <div className="cart-item-info">
+            <h3>{item.Name}</h3>
+            <p>Category: {item.Category}</p>
+            <p>Size: {item.size}</p>
+            <p>₹ {item.price.toLocaleString()}</p>
+            <div className="quantity-controls">
+              <button
+                onClick={() => handleQuantityChange(item, item.quantity - 1)}
+                disabled={item.quantity <= 1}
+              >
+                <FaMinus />
+              </button>
+              <span>{item.quantity}</span>
+              <button
+                onClick={() => handleQuantityChange(item, item.quantity + 1)}
+              >
+                <FaPlus />
+              </button>
+            </div>
+          </div>
+          <p className="cart-item-total">
+            ₹ {(item.price * item.quantity).toLocaleString()}
+          </p>
+        </motion.div>
+      ))}
+    </motion.div>
+  );
 
+  const AddressSection = React.memo(() => (
+    <motion.div
+      className="address-section"
+      initial={{ opacity: 0, x: "100%" }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: "100%" }}
+      transition={{ duration: 0.5 }}
+    >
+      <h2>Shipping Address</h2>
+      {savedAddresses.map((address) => (
+        <div
+          key={address.id}
+          className={`address-item ${
+            selectedAddress?.id === address.id ? "selected" : ""
+          }`}
+          onClick={() => setSelectedAddress(address)}
+        >
+          <p>{address.name}</p>
+          <p>{address.street}</p>
+          <p>{`${address.city}, ${address.state} ${address.pinCode}`}</p>
+        </div>
+      ))}
+      <button onClick={() => setShowAddressForm(!showAddressForm)}>
+        {showAddressForm ? "Cancel" : "Add New Address"}
+      </button>
+      {showAddressForm && (
+        <form className="address-form" onSubmit={handleAddressSubmit}>
+          <input
+            type="text"
+            name="name"
+            value={shippingInfo.name}
+            onChange={(e) =>
+              setShippingInfo({ ...shippingInfo, name: e.target.value })
+            }
+            placeholder="Name"
+            required
+          />
+          <input
+            type="text"
+            name="number"
+            value={shippingInfo.number}
+            onChange={(e) =>
+              setShippingInfo({ ...shippingInfo, number: e.target.value })
+            }
+            placeholder="Phone Number"
+            required
+          />
+          <input
+            type="text"
+            name="flat"
+            value={shippingInfo.flat}
+            onChange={(e) =>
+              setShippingInfo({ ...shippingInfo, flat: e.target.value })
+            }
+            placeholder="Flat No / Building Name"
+            required
+          />
+          <input
+            type="text"
+            name="street"
+            value={shippingInfo.street}
+            onChange={(e) =>
+              setShippingInfo({ ...shippingInfo, street: e.target.value })
+            }
+            placeholder="Street"
+            required
+          />
+          <input
+            type="text"
+            name="locality"
+            value={shippingInfo.locality}
+            onChange={(e) =>
+              setShippingInfo({ ...shippingInfo, locality: e.target.value })
+            }
+            placeholder="Locality"
+            required
+          />
+          <input
+            type="text"
+            name="city"
+            value={shippingInfo.city}
+            onChange={(e) =>
+              setShippingInfo({ ...shippingInfo, city: e.target.value })
+            }
+            placeholder="City"
+            required
+          />
+          <input
+            type="text"
+            name="pinCode"
+            value={shippingInfo.pinCode}
+            onChange={(e) =>
+              setShippingInfo({ ...shippingInfo, pinCode: e.target.value })
+            }
+            placeholder="Pin Code"
+            required
+          />
+          <select
+            name="state"
+            value={shippingInfo.state}
+            onChange={(e) =>
+              setShippingInfo({ ...shippingInfo, state: e.target.value })
+            }
+            required
+          >
+            <option value="">Select state</option>
+            <option value="AN">Andaman and Nicobar Islands</option>
+            <option value="AP">Andhra Pradesh</option>
+            <option value="AR">Arunachal Pradesh</option>
+            <option value="AS">Assam</option>
+            <option value="BR">Bihar</option>
+            <option value="CH">Chandigarh</option>
+            <option value="CT">Chhattisgarh</option>
+            <option value="DN">Dadra and Nagar Haveli</option>
+            <option value="DD">Daman and Diu</option>
+            <option value="DL">Delhi</option>
+            <option value="GA">Goa</option>
+            <option value="GJ">Gujarat</option>
+            <option value="HR">Haryana</option>
+            <option value="HP">Himachal Pradesh</option>
+            <option value="JK">Jammu and Kashmir</option>
+            <option value="JH">Jharkhand</option>
+            <option value="KA">Karnataka</option>
+            <option value="KL">Kerala</option>
+            <option value="LA">Ladakh</option>
+            <option value="LD">Lakshadweep</option>
+            <option value="MP">Madhya Pradesh</option>
+            <option value="MH">Maharashtra</option>
+            <option value="MN">Manipur</option>
+            <option value="ML">Meghalaya</option>
+            <option value="MZ">Mizoram</option>
+            <option value="NL">Nagaland</option>
+            <option value="OR">Odisha</option>
+            <option value="PY">Puducherry</option>
+            <option value="PB">Punjab</option>
+            <option value="RJ">Rajasthan</option>
+            <option value="SK">Sikkim</option>
+            <option value="TN">Tamil Nadu</option>
+            <option value="TG">Telangana</option>
+            <option value="TR">Tripura</option>
+            <option value="UP">Uttar Pradesh</option>
+            <option value="UT">Uttarakhand</option>
+            <option value="WB">West Bengal</option>
+          </select>
+          <button type="submit">Save Address</button>
+        </form>
+      )}
+    </motion.div>
+  ));
+
+  const PaymentSection = () => {
+    const cartTotal = cartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    return (
+      <motion.div
+        className="payment-section"
+        initial={{ opacity: 0, x: "100%" }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: "100%" }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2>Payment</h2>
+        <div className="coupon-section">
+          <input
+            type="text"
+            value={coupon}
+            onChange={(e) => setCoupon(e.target.value)}
+            placeholder="Enter coupon code"
+          />
+          <button onClick={() => alert("Coupon applied!")}>Apply</button>
+        </div>
         <div className="order-summary">
           <h3>Order Summary</h3>
-          {/* Shipping Info Form */}
-          <button
-            className="add-address-button"
-            onClick={handleAddAddressClick}
-          >
-            {showForm ? "Cancel" : "Add Address"}
-          </button>
-          {/* Address Form */}
-          {showForm && (
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="name"
-                value={shippingInfo.name}
-                onChange={handleInputChange}
-                placeholder="Name"
-                required
-              />
-              <input
-                type="text"
-                name="number"
-                value={shippingInfo.number}
-                onChange={handleInputChange}
-                placeholder="Phone Number"
-                required
-              />
-              <input
-                type="text"
-                name="flat"
-                value={shippingInfo.flat}
-                onChange={handleInputChange}
-                placeholder="Flat No / Building Name"
-                required
-              />
-              <input
-                type="text"
-                name="street"
-                value={shippingInfo.street}
-                onChange={handleInputChange}
-                placeholder="Street"
-                required
-              />
-              <input
-                type="text"
-                name="locality"
-                value={shippingInfo.locality}
-                onChange={handleInputChange}
-                placeholder="Locality"
-                required
-              />
-              <input
-                type="text"
-                name="city"
-                value={shippingInfo.city}
-                onChange={handleInputChange}
-                placeholder="City"
-                required
-              />
-              <input
-                type="text"
-                name="pinCode"
-                value={shippingInfo.pinCode}
-                onChange={handleInputChange}
-                placeholder="Pin Code"
-                required
-              />
-              <select
-                name="state"
-                value={shippingInfo.state}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select state</option>
-                <option value="AN">Andaman and Nicobar Islands</option>
-                <option value="AP">Andhra Pradesh</option>
-                <option value="AR">Arunachal Pradesh</option>
-                <option value="AS">Assam</option>
-                <option value="BR">Bihar</option>
-                <option value="CH">Chandigarh</option>
-                <option value="CT">Chhattisgarh</option>
-                <option value="DN">Dadra and Nagar Haveli</option>
-                <option value="DD">Daman and Diu</option>
-                <option value="DL">Delhi</option>
-                <option value="GA">Goa</option>
-                <option value="GJ">Gujarat</option>
-                <option value="HR">Haryana</option>
-                <option value="HP">Himachal Pradesh</option>
-                <option value="JK">Jammu and Kashmir</option>
-                <option value="JH">Jharkhand</option>
-                <option value="KA">Karnataka</option>
-                <option value="KL">Kerala</option>
-                <option value="LA">Ladakh</option>
-                <option value="LD">Lakshadweep</option>
-                <option value="MP">Madhya Pradesh</option>
-                <option value="MH">Maharashtra</option>
-                <option value="MN">Manipur</option>
-                <option value="ML">Meghalaya</option>
-                <option value="MZ">Mizoram</option>
-                <option value="NL">Nagaland</option>
-                <option value="OR">Odisha</option>
-                <option value="PY">Puducherry</option>
-                <option value="PB">Punjab</option>
-                <option value="RJ">Rajasthan</option>
-                <option value="SK">Sikkim</option>
-                <option value="TN">Tamil Nadu</option>
-                <option value="TG">Telangana</option>
-                <option value="TR">Tripura</option>
-                <option value="UP">Uttar Pradesh</option>
-                <option value="UT">Uttarakhand</option>
-                <option value="WB">West Bengal</option>
-              </select>
-              <button type="submit">Save Shipping Information</button>
-            </form>
-          )}
-          {/* Saved Addresses Dropdown */}
-          <div className="address-selection">
-            <label>Select Address:</label>
+          <div className="summary-row">
+            <span>Subtotal</span>
+            <span>₹{cartTotal.toLocaleString()}</span>
+          </div>
+          <div className="summary-row">
+            <span>Shipping</span>
+            <span>Free</span>
+          </div>
+          <div className="summary-row total">
+            <span>Total</span>
+            <span>₹{cartTotal.toLocaleString()}</span>
+          </div>
+        </div>
+        <motion.button
+          className="pay-button"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handlePayClick}
+        >
+          Pay Now
+        </motion.button>
+      </motion.div>
+    );
+  };
 
-            {savedAddresses.map((address, index) => (
-              <div key={index} className="address-option">
-                <input
-                  type="radio"
-                  name="address"
-                  value={address.id}
-                  checked={selectedAddressId === address.id}
-                  onChange={() => handleAddressSelection(address.id)}
+  return (
+    <div className="checkout-container">
+      <div className="checkout-header">
+        <h1 className="checkout-title">Checkout</h1>
+        <div className="checkout-steps">
+          {[1, 2, 3].map((step) => (
+            <div key={step} className="step-item">
+              <motion.div
+                className={`step-circle ${step <= currentStep ? "active" : ""}`}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                {step === 1 && <FiShoppingCart />}
+                {step === 2 && <FiPackage />}
+                {step === 3 && <FiCreditCard />}
+              </motion.div>
+              {step < 3 && (
+                <div
+                  className={`step-line ${step < currentStep ? "active" : ""}`}
                 />
-                {address.name}, {address.number},{address.flat}.........
-              </div>
-            ))}
-            {showAddressDetails && (
-              <div className="address-details-form">
-                <h4>Address Details</h4>
-                <div>
-                  <strong>Name:</strong> {selectedAddress.name}
-                </div>
-                <div>
-                  <strong>Number:</strong> {selectedAddress.number}
-                </div>
-                <div>
-                  <strong>Flat No:</strong> {selectedAddress.flat}
-                </div>
-                <div>
-                  <strong>Building Name:</strong> {selectedAddress.buildingName}
-                </div>
-                <div>
-                  <strong>Street Name:</strong> {selectedAddress.streetName}
-                </div>
-                <div>
-                  <strong>Locality:</strong> {selectedAddress.locality}
-                </div>
-                <div>
-                  <strong>City:</strong> {selectedAddress.city}
-                </div>
-                <div>
-                  <strong>State:</strong> {selectedAddress.state}
-                </div>
-                <div>
-                  <strong>Pin Code:</strong> {selectedAddress.pinCode}
-                </div>
-              </div>
-            )}
-            {selectedAddressId && (
-              <button onClick={handleCancelSelection}>Cancel Selection</button>
-            )}
-          </div>
-          <div className="summary-details">
-            <div className="summary-row">
-              <span>Subtotal</span>
-              <span>₹ {cartTotal.toLocaleString()}</span>
+              )}
             </div>
-            <div className="summary-row">
-              <span>Discount</span>
-              <span>Free</span>
-            </div>
-            <div className="summary-row total">
-              <span>Total</span>
-              <span>₹ {cartTotal.toLocaleString()}</span>
-            </div>
-          </div>
-          <div className="summary-actions">
-            {!showCouponInput && (
-              <button
-                className="toggle-coupon-button"
-                onClick={handleCouponToggle}
-              >
-                Have a coupon code?
-              </button>
-            )}
-            {/* <button onClick={saveOrder}>Save Order</button> */}
-
-            {showCouponInput && (
-              <div className="coupon-section">
-                <input type="text" placeholder="Coupon Code" />
-                <button className="apply-button">Apply</button>
-                <button className="close-button" onClick={handleCouponToggle}>
-                  <span
-                    style={{
-                      color: "#000",
-                      fontSize: "10pt",
-                      fontWeight: "600",
-                    }}
-                  >
-                    &times;
-                  </span>
-                </button>
-              </div>
-            )}
-          </div>
-          <Link to={"/Payment"}>
+          ))}
+        </div>
+      </div>
+      <div className="checkout-content">
+        <AnimatePresence mode="wait">
+          {currentStep === 1 && (
+            <motion.div
+              key="cart"
+              className="main-section"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CartSection />
+            </motion.div>
+          )}
+          {currentStep === 2 && (
+            <motion.div
+              key="address"
+              className="side-section"
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ duration: 0.3 }}
+            >
+              <AddressSection />
+            </motion.div>
+          )}
+          {currentStep === 3 && (
+            <motion.div
+              key="payment"
+              className="side-section"
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ duration: 0.3 }}
+            >
+              <PaymentSection />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <div className="navigation-buttons">
+          {currentStep > 1 && (
             <motion.button
-              className="pay-button"
+              className="nav-btn prev"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handlePayClick}
+              onClick={() => setCurrentStep(currentStep - 1)}
             >
-              Pay
+              Previous
             </motion.button>
-          </Link>
+          )}
+          {currentStep < 3 && (
+            <motion.button
+              className="nav-btn next"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setCurrentStep(currentStep + 1)}
+            >
+              Next
+            </motion.button>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default Checkout;
+export default PremiumCheckout;

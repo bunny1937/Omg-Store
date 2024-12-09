@@ -1,0 +1,194 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap");
+
+:root {
+  --bg-color: #f0f4f8;
+  --primary-color: #ffe9c1;
+  --secondary-color: #4c51bf;
+  --accent-color: #667eea;
+  --text-color: #2d3748;
+  --border-color: #e2e8f0;
+  --primary-light: #f0f4f8; /* Added primary light color */
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: "Montserrat", sans-serif;
+  line-height: 1.6;
+}
+
+.profile-container {
+  display: flex;
+  margin: 2rem auto;
+  gap: 5rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffffff, #f6f8fa);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+}
+
+.section {
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffffff, #f0f4f8);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+.left {
+  width: 35%;
+  display: flex;
+  flex-direction: column;
+  margin-right: 1rem;
+}
+.input-grid,
+.shipping-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.shipping-form-grid,
+.shipping-info-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+.input,
+input[type="text"],
+input[type="email"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: var(--text-color);
+  font-family: "Montserrat", sans-serif;
+  transition: all 0.3s ease;
+}
+
+.input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.input:disabled {
+  background-color: #f8fafc;
+  cursor: not-allowed;
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  color: #ffffff;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color),
+    var(--primary-color)
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.edit-button {
+  background: transparent;
+  color: var(--accent-color);
+  padding: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.edit-button:hover {
+  color: var(--primary-color);
+  background: transparent;
+  transform: scale(1.1);
+}
+
+.button-container {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.button-container .cancel-button {
+  background: linear-gradient(135deg, #cbd5e0, #a0aec0);
+}
+
+.button-container .cancel-button:hover {
+  background: linear-gradient(135deg, #a0aec0, #cbd5e0);
+}
+
+.shipping-info-li {
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.shipping-info-li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.shipping-info-display p {
+  margin: 0.5rem 0;
+}
+
+.orders-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.order-item img {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-shipping-info {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  background-color: var(--primary-light);
+  padding: 1rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+    flex-direction: column;
+  }
+
+  .input-grid,
+  .shipping-form-grid,
+  .order-item-grid {
+    grid-template-columns: 1fr;
+  }
+  .left,
+  .orders-section {
+    width: 100%;
+  }
+}

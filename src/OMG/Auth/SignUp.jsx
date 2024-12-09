@@ -1,13 +1,25 @@
+import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
 import {
   createUserWithEmailAndPassword,
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import { useState } from "react";
-import { Link } from "react-router-dom";
 import { firebaseApp } from "../db/Firebase";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  updateDoc,
+  getDoc,
+} from "firebase/firestore";
+import Dialog from "@mui/material/Dialog"; // For dialog box
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import "./SignUp.css";
 
 const auth = getAuth(firebaseApp);
@@ -19,18 +31,13 @@ function SignUp() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [openDialog, setOpenDialog] = useState(false); // Dialog state
+  const navigate = useNavigate();
 
-  // Initialize Google Auth provider
   const provider = new GoogleAuthProvider();
 
   const signup = async () => {
-    if (
-      email === "" ||
-      password === "" ||
-      firstName === "" ||
-      lastName === "" ||
-      phoneNumber === ""
-    ) {
+    if (!email || !password || !firstName || !lastName || !phoneNumber) {
       return alert("Please fill all fields");
     }
     try {
@@ -41,24 +48,20 @@ function SignUp() {
       );
       const user = userCredential.user;
 
-      // Store user details in Firestore under "users" collection
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
-        firstName: firstName,
-        lastName: lastName,
-        phoneNumber: phoneNumber,
+        firstName,
+        lastName,
+        phoneNumber,
         createdAt: new Date(),
       });
 
       alert("Signup Successful");
-      setEmail("");
-      setPassword("");
-      setFirstName("");
-      setLastName("");
-      setPhoneNumber("");
+      resetForm();
     } catch (error) {
       console.log(error);
+      alert("Signup Failed");
     }
   };
 
@@ -67,20 +70,59 @@ function SignUp() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Store user ID in Firestore if it's a new user
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        email: user.email,
-        firstName: firstName || "N/A",
-        lastName: lastName || "N/A",
-        phoneNumber: phoneNumber || "N/A",
-        createdAt: new Date(),
-      });
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          firstName: "",
+          lastName: "",
+          phoneNumber: "",
+          createdAt: new Date(),
+        });
+      }
 
-      alert("Google Signup Successful");
+      // Check if essential fields are missing
+      const userData = userDoc.data();
+      if (
+        !userData ||
+        !userData.firstName ||
+        !userData.lastName ||
+        !userData.phoneNumber
+      ) {
+        setOpenDialog(true);
+      }
     } catch (error) {
       console.log(error);
+      alert("Google Signup Failed");
     }
+  };
+
+  const handleDialogSubmit = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        await updateDoc(doc(db, "users", user.uid), {
+          firstName,
+          lastName,
+          phoneNumber,
+        });
+        setOpenDialog(false);
+        alert("Profile Updated Successfully");
+        navigate("/Home");
+      }
+    } catch (error) {
+      console.log(error);
+      alert("Failed to update profile");
+    }
+  };
+
+  const resetForm = () => {
+    setEmail("");
+    setPassword("");
+    setFirstName("");
+    setLastName("");
+    setPhoneNumber("");
   };
 
   return (
@@ -95,9 +137,8 @@ function SignUp() {
             type="text"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            name="firstName"
-            className="input"
             placeholder="First Name"
+            className="input"
           />
         </div>
         <div className="input-field">
@@ -105,9 +146,8 @@ function SignUp() {
             type="text"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            name="lastName"
-            className="input"
             placeholder="Last Name"
+            className="input"
           />
         </div>
         <div className="input-field">
@@ -115,9 +155,8 @@ function SignUp() {
             type="text"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
-            name="phoneNumber"
-            className="input"
             placeholder="Phone Number"
+            className="input"
           />
         </div>
         <div className="input-field">
@@ -125,9 +164,8 @@ function SignUp() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            name="email"
-            className="input"
             placeholder="Email"
+            className="input"
           />
         </div>
         <div className="input-field">
@@ -135,8 +173,8 @@ function SignUp() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="input"
             placeholder="Password"
+            className="input"
           />
         </div>
         <div className="button-field">
@@ -150,14 +188,45 @@ function SignUp() {
           </button>
         </div>
         <div className="login-link">
-          <h2 className="text">
-            Already have an account?
-            <Link className="link" to={"/SignIn"}>
-              Sign In
-            </Link>
+          <h2>
+            Already have an account? <Link to={"/SignIn"}>Sign In</Link>
           </h2>
         </div>
       </div>
+
+      {/* Dialog Box */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Complete Your Profile</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="First Name"
+            fullWidth
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            margin="normal"
+          />
+          <TextField
+            label="Last Name"
+            fullWidth
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            margin="normal"
+          />
+          <TextField
+            label="Phone Number"
+            fullWidth
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button onClick={handleDialogSubmit} color="primary">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

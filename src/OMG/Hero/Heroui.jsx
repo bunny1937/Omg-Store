@@ -9,6 +9,8 @@ import Scroll1 from "../shoppingcart/components/Scroll";
 import Lenis from "../shoppingcart/components/Lenis";
 import Category from "./Category/Category";
 import Lenis2 from "../shoppingcart/components/Lenis2";
+import Landingpage from "../shoppingcart/components/Landingpage";
+import Gsap from "../shoppingcart/components/Gsap";
 export default function Heroui() {
   return (
     <>
@@ -16,7 +18,7 @@ export default function Heroui() {
       <Gitdemo2 />
       */}
       {/* <Lenis /> */}
-
+      <Landingpage />
       <BentoGrid />
       <Lenis2 />
       {/* <AniComponent1 />*/}

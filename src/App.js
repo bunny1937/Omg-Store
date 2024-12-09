@@ -21,6 +21,15 @@ import { UserProvider } from "./OMG/Auth/UserContext";
 import Checkout from "./OMG/shoppingcart/components/Checkout";
 import Payment from "./OMG/shoppingcart/components/Payment";
 import CategoryPage from "./OMG/Hero/Category/Categorypage";
+import UserProfile from "./OMG/Auth/UserProfile";
+import UserProfile1 from "./OMG/shoppingcart/components/UserProfile/UserProfile";
+import Order from "./OMG/shoppingcart/components/UserProfile/Order";
+import Profile from "./OMG/shoppingcart/components/UserProfile/Profile";
+import Address from "./OMG/shoppingcart/components/UserProfile/Address";
+import ReturnRefund from "./OMG/shoppingcart/components/UserProfile/Return-Refund";
+import TermsCo from "./OMG/shoppingcart/components/UserProfile/Terms-Co";
+import ContactUs from "./OMG/shoppingcart/components/UserProfile/Contact-Us";
+
 function App() {
   return (
     <ReactLenis root>
@@ -33,6 +42,25 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Heroui />} />
                   <Route path="/SignUp" element={<Signup />} />
+                  <Route path="UserProfile" element={<UserProfile />} />
+                  <Route path="/UserProfile1" element={<UserProfile1 />} />
+                  <Route path="/UserProfile1/order" element={<Order />} />
+                  <Route path="/UserProfile1/profile" element={<Profile />} />
+                  <Route path="/UserProfile1/order" element={<Order />} />
+                  <Route
+                    path="/UserProfile1/favourites"
+                    element={<Favourites />}
+                  />
+                  <Route path="/UserProfile1/address" element={<Address />} />
+                  <Route
+                    path="/UserProfile1/returnrefund"
+                    element={<ReturnRefund />}
+                  />
+                  <Route path="/UserProfile1/termsco" element={<TermsCo />} />
+                  <Route
+                    path="/UserProfile1/contactus"
+                    element={<ContactUs />}
+                  />
                   <Route path="/SignIn" element={<SignIn />} />
                   <Route path="/Home" element={<Home />} />
                   <Route path="/Details/:id" element={<Details />} />

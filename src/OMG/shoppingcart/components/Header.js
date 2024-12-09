@@ -255,7 +255,15 @@ const Header = () => {
           {dropdown && (
             <ul className="dropdown-menu">
               {user ? (
-                <li onClick={logout}>Logout</li>
+                <>
+                  <li onClick={logout}>Logout</li>
+                  <Link to={"/UserProfile"}>
+                    <p>Profile</p>
+                  </Link>
+                  <Link to={"/UserProfile1"}>
+                    <p>ProfileNew</p>
+                  </Link>
+                </>
               ) : (
                 <>
                   <li>
