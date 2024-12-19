@@ -108,54 +108,34 @@ function SignIn({ onClose, open }) {
   const signInWithGoogle = async () => {
     setLoading(true);
     try {
-      if (isMobile) {
-        await setPersistence(auth, browserSessionPersistence);
-        await signInWithRedirect(auth, provider);
-        const result = await getRedirectResult(auth);
-        if (result) {
-          const user = result.user;
-          setUser(user);
-          localStorage.setItem("user", JSON.stringify(user));
+      // Use session persistence for better handling across sessions
+      await setPersistence(auth, browserSessionPersistence);
 
-          // Check Firestore for user data
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
+      // Trigger sign-in flow
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-          if (!userDoc.exists()) {
-            await setDoc(userDocRef, {
-              uid: user.uid,
-              email: user.email,
-              firstName: "",
-              lastName: "",
-              phoneNumber: "",
-              createdAt: new Date(),
-            });
-          }
-          navigate("/Home");
-        }
-      } else {
-        await setPersistence(auth, browserSessionPersistence);
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        setUser(user);
-        localStorage.setItem("user", JSON.stringify(user));
+      // Set the user in context and localStorage
+      setUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
 
-        // Check Firestore for user data
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
+      // Check Firestore for existing user data
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
 
-        if (!userDoc.exists()) {
-          await setDoc(userDocRef, {
-            uid: user.uid,
-            email: user.email,
-            firstName: "",
-            lastName: "",
-            phoneNumber: "",
-            createdAt: new Date(),
-          });
-        }
-        navigate("/Home");
+      // If user doesn't exist, create a new Firestore document
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          email: user.email,
+          firstName: "",
+          lastName: "",
+          phoneNumber: "",
+          createdAt: new Date(),
+        });
       }
+
+      navigate("/Home"); // Navigate after successful login
     } catch (error) {
       console.error("Google Sign-In Error:", error);
 

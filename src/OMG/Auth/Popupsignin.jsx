@@ -107,7 +107,9 @@ function Popupsignin({ onClose }) {
     <div className="popup-signin-container">
       {showSignUp ? (
         <SignUp
-          onClose={() => setShowSignUp(false)}
+          onClose={() => {
+            setShowSignUp(false); // Ensure SignUp popup closes
+          }}
           onSignUpSuccess={() => {
             setShowSignUp(false); // Close SignUp modal
             alert("Signup successful! Please log in.");
