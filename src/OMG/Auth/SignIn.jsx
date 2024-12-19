@@ -7,6 +7,14 @@ import {
   signInWithPopup,
   onAuthStateChanged,
 } from "firebase/auth";
+import { isMobile } from "react-device-detect";
+import {
+  signInWithRedirect,
+  getRedirectResult,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
+
 import { firebaseApp } from "../db/Firebase";
 import {
   getFirestore,
@@ -98,46 +106,106 @@ function SignIn({ onClose, open }) {
   };
 
   const signInWithGoogle = async () => {
-    setLoading(true); // Indicate the loading state
+    setLoading(true);
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      setUser(user);
-      localStorage.setItem("user", JSON.stringify(user)); // Persist user data
+      if (isMobile) {
+        await setPersistence(auth, browserSessionPersistence);
+        await signInWithRedirect(auth, provider);
+        const result = await getRedirectResult(auth);
+        if (result) {
+          const user = result.user;
+          setUser(user);
+          localStorage.setItem("user", JSON.stringify(user));
 
-      // Check if the user already exists in Firestore
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
+          // Check Firestore for user data
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
 
-      if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          email: user.email,
-          firstName: "",
-          lastName: "",
-          phoneNumber: "",
-          createdAt: new Date(),
-        });
-      } else {
-        const userData = userDoc.data();
-        if (
-          !userData.firstName ||
-          !userData.lastName ||
-          !userData.phoneNumber
-        ) {
-          setOpenDialog(true); // Open dialog for profile completion
+          if (!userDoc.exists()) {
+            await setDoc(userDocRef, {
+              uid: user.uid,
+              email: user.email,
+              firstName: "",
+              lastName: "",
+              phoneNumber: "",
+              createdAt: new Date(),
+            });
+          }
+          navigate("/Home");
         }
-      }
+      } else {
+        await setPersistence(auth, browserSessionPersistence);
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        setUser(user);
+        localStorage.setItem("user", JSON.stringify(user));
 
-      // Close the modal
-      console.log("Firestore operation result:", userDoc.exists()); // Better error message
+        // Check Firestore for user data
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+          await setDoc(userDocRef, {
+            uid: user.uid,
+            email: user.email,
+            firstName: "",
+            lastName: "",
+            phoneNumber: "",
+            createdAt: new Date(),
+          });
+        }
+        navigate("/Home");
+      }
     } catch (error) {
-      console.error("Google Signup Error:", error);
-      alert("Google Signup Failed: " + error.message);
-      console.log("User after Google sign-in:", user);
+      console.error("Google Sign-In Error:", error);
+
+      // User-Friendly Error Messages
+      switch (error.code) {
+        case "auth/network-request-failed":
+          alert(
+            "Network error occurred while trying to sign in. Please check your internet connection and try again."
+          );
+          break;
+
+        case "auth/popup-closed-by-user":
+          alert(
+            "It seems like you closed the sign-in popup before completing the process. Please try again."
+          );
+          break;
+
+        case "auth/cancelled-popup-request":
+          alert(
+            "Another sign-in process was initiated before the previous one completed. Please wait and try again."
+          );
+          break;
+
+        case "auth/operation-not-allowed":
+          alert(
+            "Google Sign-In is currently disabled. Please contact support or try again later."
+          );
+          break;
+
+        case "auth/unauthorized-domain":
+          alert(
+            "The current domain is not authorized for Google Sign-In. Please contact support."
+          );
+          break;
+
+        case "auth/invalid-credential":
+          alert(
+            "An invalid credential was provided. Please refresh the page and try again."
+          );
+          break;
+
+        default:
+          alert(
+            "An unexpected error occurred during sign-in. Please try again later. Error: " +
+              error.message
+          );
+          break;
+      }
     } finally {
       setLoading(false);
-      navigate("/Home");
     }
   };
 

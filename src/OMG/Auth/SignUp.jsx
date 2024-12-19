@@ -5,17 +5,10 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signOut,
   signInWithRedirect,
 } from "firebase/auth";
 import { firebaseApp } from "../db/Firebase";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  updateDoc,
-  getDoc,
-} from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import UserContext from "./UserContext";
 import "./SignUp.css";
 
@@ -38,6 +31,7 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
     if (!email || !password || !firstName || !lastName || !phoneNumber) {
       return alert("Please fill all fields");
     }
+    setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -45,7 +39,7 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
         password
       );
       const user = userCredential.user;
-      setUser(user);
+
       const sanitizedId = `${firstName.trim().toLowerCase()}-${lastName
         .trim()
         .toLowerCase()}-${phoneNumber}`.replace(/[^a-z0-9-]/g, "");
@@ -59,13 +53,21 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
         createdAt: new Date(),
       });
 
+      setUser(user); // Set user in the context
       alert("Signup Successful");
       resetForm();
-      await signOut(auth);
+      // alert("Signup Successful");
+      // resetForm();
+      // await signOut(auth);
+      // if (onSignUpSuccess) {
+      //   onSignUpSuccess();
+      // } else {
+      //   navigate("/SignIn");
+      // }
       if (onSignUpSuccess) {
         onSignUpSuccess();
       } else {
-        navigate("/SignIn");
+        navigate("/Home"); // Navigate only if signup is successful
       }
     } catch (error) {
       let errorMessage;
@@ -89,6 +91,7 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
   };
 
   const signInWithGoogle = async () => {
+    setLoading(true);
     try {
       const isMobile = /Mobi|Android/i.test(navigator.userAgent);
       if (isMobile) {
@@ -96,7 +99,6 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
       } else {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        setUser(user);
 
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (!userDoc.exists()) {
@@ -110,7 +112,9 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
           });
         }
 
+        setUser(user); // Set user in the context
         onClose && onClose(); // Close the modal
+        navigate("/Home");
       }
     } catch (error) {
       let errorMessage;
@@ -195,13 +199,17 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
             />
           </div>
           <div className="button-field">
-            <button onClick={signup} className="btn">
-              Signup
+            <button onClick={signup} className="btn" disabled={loading}>
+              {loading ? "Signing Up..." : "Signup"}
             </button>
           </div>
           <div className="button-field">
-            <button onClick={signInWithGoogle} className="btn google-btn">
-              Sign Up with Google
+            <button
+              onClick={signInWithGoogle}
+              className="btn google-btn"
+              disabled={loading}
+            >
+              {loading ? "Loading..." : "Sign Up with Google"}
             </button>
           </div>
           <div className="login-link">
