@@ -98,6 +98,7 @@ function SignIn({ onClose, open }) {
       }
       setEmail("");
       setPassword("");
+      resetForm("");
     } catch (error) {
       setError(error.message);
     } finally {

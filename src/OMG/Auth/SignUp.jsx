@@ -1,11 +1,12 @@
 import { useNavigate, Link } from "react-router-dom";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   createUserWithEmailAndPassword,
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
+  getRedirectResult,
 } from "firebase/auth";
 import { firebaseApp } from "../db/Firebase";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
@@ -26,6 +27,37 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
+
+  // Handle Google Redirect Result
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          const user = result.user;
+
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (!userDoc.exists()) {
+            await setDoc(doc(db, "users", user.uid), {
+              uid: user.uid,
+              email: user.email,
+              firstName: "",
+              lastName: "",
+              phoneNumber: "",
+              createdAt: new Date(),
+            });
+          }
+
+          setUser(user); // Set user in the context
+          onClose && onClose(); // Close the modal
+          navigate("/Home");
+        }
+      } catch (error) {
+        setError("Failed to process Google Sign-In redirect.");
+      }
+    };
+    handleRedirectResult();
+  }, [onClose, navigate, setUser]);
 
   const signup = async () => {
     if (!email || !password || !firstName || !lastName || !phoneNumber) {
@@ -56,35 +88,14 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
       setUser(user); // Set user in the context
       alert("Signup Successful");
       resetForm();
-      // alert("Signup Successful");
-      // resetForm();
-      // await signOut(auth);
-      // if (onSignUpSuccess) {
-      //   onSignUpSuccess();
-      // } else {
-      //   navigate("/SignIn");
-      // }
+      await signOut(auth);
       if (onSignUpSuccess) {
         onSignUpSuccess();
       } else {
-        navigate("/Home"); // Navigate only if signup is successful
+        navigate("/Home");
       }
     } catch (error) {
-      let errorMessage;
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          errorMessage = "This email is already in use.";
-          break;
-        case "auth/invalid-email":
-          errorMessage = "The email address is invalid.";
-          break;
-        case "auth/weak-password":
-          errorMessage = "The password is too weak.";
-          break;
-        default:
-          errorMessage = error.message || "An unknown error occurred.";
-      }
-      setError(errorMessage);
+      handleAuthError(error);
     } finally {
       setLoading(false);
     }
@@ -117,23 +128,35 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
         navigate("/Home");
       }
     } catch (error) {
-      let errorMessage;
-      switch (error.code) {
-        case "auth/popup-closed-by-user":
-          errorMessage =
-            "The Google sign-up pop-up was closed before completing the process.";
-          break;
-        case "auth/network-request-failed":
-          errorMessage =
-            "Network error occurred. Please check your connection.";
-          break;
-        default:
-          errorMessage = error.message || "An unknown error occurred.";
-      }
-      setError(errorMessage);
+      handleAuthError(error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAuthError = (error) => {
+    let errorMessage;
+    switch (error.code) {
+      case "auth/email-already-in-use":
+        errorMessage = "This email is already in use.";
+        break;
+      case "auth/invalid-email":
+        errorMessage = "The email address is invalid.";
+        break;
+      case "auth/weak-password":
+        errorMessage = "The password is too weak.";
+        break;
+      case "auth/popup-closed-by-user":
+        errorMessage =
+          "The Google sign-up pop-up was closed before completing the process.";
+        break;
+      case "auth/network-request-failed":
+        errorMessage = "Network error occurred. Please check your connection.";
+        break;
+      default:
+        errorMessage = error.message || "An unknown error occurred.";
+    }
+    setError(errorMessage);
   };
 
   const resetForm = () => {

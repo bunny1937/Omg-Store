@@ -96,6 +96,7 @@ function Popupsignin({ onClose }) {
       }
 
       alert("Google Sign-In Successful");
+      onClose();
     } catch (error) {
       setError(error.message);
     } finally {
