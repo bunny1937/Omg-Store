@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
+  signInWithRedirect,
 } from "firebase/auth";
 import { firebaseApp } from "../db/Firebase";
 import {
@@ -15,12 +16,6 @@ import {
   updateDoc,
   getDoc,
 } from "firebase/firestore";
-import Dialog from "@mui/material/Dialog"; // For dialog box
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import UserContext from "./UserContext";
 import "./SignUp.css";
 
@@ -73,9 +68,21 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
         navigate("/SignIn");
       }
     } catch (error) {
-      console.log(error);
-      alert("Signup Failed");
-      setError(error.message);
+      let errorMessage;
+      switch (error.code) {
+        case "auth/email-already-in-use":
+          errorMessage = "This email is already in use.";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "The email address is invalid.";
+          break;
+        case "auth/weak-password":
+          errorMessage = "The password is too weak.";
+          break;
+        default:
+          errorMessage = error.message || "An unknown error occurred.";
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -83,26 +90,43 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
 
   const signInWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      setUser(user);
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          email: user.email,
-          firstName: "",
-          lastName: "",
-          phoneNumber: "",
-          createdAt: new Date(),
-        });
-      }
+      const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+      } else {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        setUser(user);
 
-      onClose && onClose(); // Close the modal
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists()) {
+          await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            email: user.email,
+            firstName: "",
+            lastName: "",
+            phoneNumber: "",
+            createdAt: new Date(),
+          });
+        }
+
+        onClose && onClose(); // Close the modal
+      }
     } catch (error) {
-      console.log(error);
-      alert("Google Signup Failed");
-      setError(error.message);
+      let errorMessage;
+      switch (error.code) {
+        case "auth/popup-closed-by-user":
+          errorMessage =
+            "The Google sign-up pop-up was closed before completing the process.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage =
+            "Network error occurred. Please check your connection.";
+          break;
+        default:
+          errorMessage = error.message || "An unknown error occurred.";
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -123,6 +147,7 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
         <div className="signup-form">
           <div className="header">
             <h1 className="title">Signup</h1>
+            <div className="error-message">{error && <p>{error}</p>}</div>
           </div>
           <div className="input-field">
             <input
