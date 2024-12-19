@@ -20,6 +20,7 @@ export const AddProducts = () => {
   const [productImgs, setProductImgs] = useState([]);
   const [Gender, setProductGender] = useState("");
   const [progress, setProgress] = useState(0);
+  const [size, setProductSize] = useState([]);
 
   const types = ["image/png", "image/jpg", "image/jpeg"]; // image types
 
@@ -34,6 +35,16 @@ export const AddProducts = () => {
     } else {
       setProductImgs([]);
     }
+  };
+
+  const toggleSize = (size) => {
+    setProductSize((prevSizes) => {
+      const updatedSizes = prevSizes.includes(size)
+        ? prevSizes.filter((s) => s !== size) // Remove if already selected
+        : [...prevSizes, size]; // Add if not selected
+      console.log("Updated Sizes:", updatedSizes); // Debugging
+      return updatedSizes;
+    });
   };
 
   // add product
@@ -116,6 +127,7 @@ export const AddProducts = () => {
         Gender,
         quantity,
         ImgUrls: imgUrls,
+        size,
       });
 
       // Reset the form
@@ -126,6 +138,7 @@ export const AddProducts = () => {
       setProductPrice(0);
       setProductImgs([]);
       setProductQuantity(0);
+      setProductSize([]);
       setProgress([]);
       document.getElementById("file").value = ""; // Clear file input
     } catch (err) {
@@ -168,6 +181,26 @@ export const AddProducts = () => {
             <option value="female">Female</option>
             <option value="unisex">Unisex</option>
           </select>
+          <br />
+          <label htmlFor="product-size">Product Size</label>
+          <h2>Select Product Sizes</h2>
+          <div className="size-selector">
+            {["S", "M", "L", "XL", "XXL"].map((size) => (
+              <button
+                key={size}
+                onClick={() => toggleSize(size)}
+                className={`size-button ${
+                  size.includes(size) ? "selected" : ""
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+
+          {/* Debugging - show selected sizes */}
+          <p>Selected Sizes: {size.join(", ")}</p>
+
           <br />
           <label htmlFor="product-name">Product Name</label>
           <input

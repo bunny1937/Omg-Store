@@ -9,10 +9,16 @@ import SimilarProducts from "./SimilarProducts";
 import ReviewSection from "./ReviewSection";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore";
 import { firebaseApp } from "../../db/Firebase";
-import { useParams } from "react-router-dom";
-import Slider from "react-slick";
+import { Link, useParams } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { FaRegHeart } from "react-icons/fa";
+import SignIn from "../../Auth/SignIn";
+import SignInSignUpPopup from "../../Auth/Popupsignin";
+import UserContext from "../../Auth/UserContext";
+
 const db = getFirestore(firebaseApp);
 
 const Details = () => {
@@ -29,6 +35,9 @@ const Details = () => {
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [shippingOpen, setShippingOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null); // For main image
+
+  const [popupOpen, setPopupOpen] = useState(false); // Popup state
+  const { user } = useContext(UserContext); // User context
 
   // Fetch product based on id
   useEffect(() => {
@@ -59,9 +68,23 @@ const Details = () => {
   const { ImgUrls = [], Name, Description, price, Gender, Category } = product;
 
   const handleAddToCart = () => {
+    console.log("Checking user context:", user); // Debugging user status
+    if (!user) {
+      console.log("User not logged in. Opening popup.");
+      setPopupOpen(true); // Open popup for unauthenticated users
+      return;
+    }
+
+    if (!selectedSize) {
+      toast.info("Please select a size before adding to cart.");
+      return;
+    }
+
     const item = {
       id,
       Img: ImgUrls[0],
+      uniqueItemId: `${id}-${selectedSize}`,
+
       Category,
       Gender,
       Name,
@@ -78,15 +101,23 @@ const Details = () => {
   };
 
   const handleAddToFavourites = () => {
+    if (!user) {
+      setPopupOpen(true); // Open popup for unauthenticated users
+      return;
+    }
     if (!selectedSize) {
-      alert("Please select a size before adding to favourites.");
+      toast.warning("Please select a size before adding to favourites.");
       return;
     }
 
     const favouriteItem = {
-      ...product,
-      id: String(id),
-      size: selectedSize,
+      id,
+      Img: ImgUrls[0], // Only the first image
+      Category,
+      Name,
+      price,
+      size: selectedSize, // Selected size
+      quantity,
     };
 
     addFavourite(favouriteItem);
@@ -196,21 +227,26 @@ const Details = () => {
                 <p>{quantity}</p>
                 <button onClick={handleIncrement}>+</button>
               </div>
-              <button
-                type="button"
-                className={`btn1 ${isAdded ? "added" : ""}`}
-                onClick={handleAddToCart}
-                disabled={!selectedSize}
-              >
-                {isAdded ? "Added" : "Add to cart"}
-              </button>
-              <button
-                type="button"
-                className={`btn1 ${isFavourite ? "Added !" : ""}`}
-                onClick={handleAddToFavourites}
-                disabled={!selectedSize}
-              >
-                {isFavourite ? "Added !" : "Favourite ?"}
+              <div className="cart-fav-box">
+                <button
+                  type="button"
+                  className={`btn1 ${isAdded ? "added" : ""}`}
+                  onClick={handleAddToCart}
+                  disabled={!selectedSize}
+                >
+                  {isAdded ? "Added" : "Add to cart"}
+                </button>
+                <button
+                  type="button"
+                  className={`btn2 ${isFavourite ? "Added !" : ""}`}
+                  onClick={handleAddToFavourites}
+                  disabled={!selectedSize}
+                >
+                  <FaRegHeart />
+                </button>
+              </div>
+              <button type="button" className="details-checkout">
+                <Link to={"/Checkout"}>Checkout</Link>
               </button>
             </div>
             <div className="description-box">
@@ -259,18 +295,27 @@ const Details = () => {
                   </Collapse>
                 </div>
               </div>
-              <ReviewSection />
             </div>
           </div>
         </div>
+        <ReviewSection />
         <Cart />
 
         <div className="similar-details">
           <SimilarProducts category={Category} id={id} />
         </div>
+        {popupOpen && (
+          <>
+            {console.log("Popup is rendering...")}{" "}
+            {/* Debugging Popup Render */}
+            <SignInSignUpPopup
+              onClose={() => setPopupOpen(false)}
+              signIn={SignIn}
+            />
+          </>
+        )}
       </div>
     </>
   );
 };
-
 export default Details;

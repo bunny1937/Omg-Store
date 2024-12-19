@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { Link } from "react-router-dom";
 import cartContext from "../context/cartContext";
@@ -19,6 +19,7 @@ const Cart = () => {
     dispatch,
   } = useContext(cartContext);
   const cartRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch cart items when user is authenticated
   useEffect(() => {
@@ -29,37 +30,44 @@ const Cart = () => {
       { scale: 1, opacity: 1, duration: 0.5, ease: "power3.out" }
     );
   }, []);
+
   // Function to fetch cart items
   useEffect(() => {
     const fetchCartItems = async (userId) => {
       try {
-        const userid = auth.currentUser.uid;
-        const cartCollection = collection(firestore, "users", userid, "Cart");
+        setIsLoading(true); // Start loading
+        const userId = auth.currentUser?.uid;
+        if (!userId || cartItems.length > 0) {
+          setIsLoading(false);
+          return; // Exit if no userId or cart already populated
+        }
+
+        const cartCollection = collection(firestore, "users", userId, "Cart");
         const cartSnapshot = await getDocs(cartCollection);
 
         const items = cartSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        console.log("Fetched Cart Items:", items); // Check for Category field in each item
 
-        // Set the fetched cart items in state
         dispatch({ type: "SET_CART_ITEMS", payload: items });
       } catch (error) {
         console.error("Error fetching cart items:", error);
+      } finally {
+        setIsLoading(false); // Stop loading
       }
     };
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         fetchCartItems(user.uid);
       } else {
-        // Handle cases where the user is not logged in, if needed
         dispatch({ type: "SET_CART_ITEMS", payload: [] });
       }
     });
 
     return () => unsubscribe();
-  }, [dispatch]);
+  }, [dispatch, cartItems.length]);
 
   // Handle disabling body scroll when cart is open
   useEffect(() => {
@@ -87,6 +95,11 @@ const Cart = () => {
         .map((item) => item.price * item.quantity)
         .reduce((prevValue, currValue) => prevValue + currValue, 0)
     : 0;
+
+  if (isLoading) {
+    return <div>Loading your cart...</div>;
+  }
+
   return (
     <>
       {isCartOpen && (
@@ -109,30 +122,42 @@ const Cart = () => {
                 <h2>Cart is empty</h2>
               ) : (
                 cartItems.map((item) => {
-                  const { id, Img, Category, Name, price, quantity } = item;
+                  const {
+                    id,
+                    Img,
+                    Category,
+                    Name,
+                    price,
+                    quantity,
+                    uniqueItemId,
+                    size,
+                  } = item;
                   const itemTotal = price * quantity;
+
                   return (
-                    <div className="cart_items" key={`${item.id}-${item.size}`}>
+                    <div className="cart_items" key={uniqueItemId}>
                       <figure className="cart_items_img">
                         <img src={Img} alt="product-img" />
                       </figure>
                       <div className="cart_items_info">
                         <h4>{Name}</h4>
                         <h5> {Category}</h5>
-                        <h3 className="size">Size:{item.size || "N/A"}</h3>
+                        <h3 className="size">Size:{size || "N/A"}</h3>
                         <h3 className="price">
                           ₹ {itemTotal.toLocaleString()} ||
                           <span> ₹ {price}</span>
                         </h3>
                       </div>
                       <div className="cart_items_quantity">
-                        <span onClick={() => decrementItem(id)}>&#8722;</span>
+                        <span onClick={() => decrementItem(id, size)}>
+                          &#8722;
+                        </span>
                         <b>{quantity}</b>
-                        <span onClick={() => incrementItem(id)}>&#43;</span>
+                        <span onClick={() => incrementItem(id, size)}>
+                          &#43;
+                        </span>
                       </div>
-                      <button
-                        onClick={() => removeItem(item.id, item.size || "N/A")}
-                      >
+                      <button onClick={() => removeItem(id, size || "N/A")}>
                         <span style={{ color: "#000", fontSize: "21pt" }}>
                           &times;
                         </span>
@@ -157,7 +182,7 @@ const Cart = () => {
               >
                 Clear Cart
               </button>
-              <Link to={"/Checkout"}>
+              <Link to={"/Checkoutold"}>
                 <button
                   type="button"
                   className="checkout_btn"

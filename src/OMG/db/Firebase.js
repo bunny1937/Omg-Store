@@ -3,7 +3,7 @@ import { getStorage, ref } from "firebase/storage";
 import {
   getAuth,
   setPersistence,
-  browserSessionPersistence,
+  browserLocalPersistence,
 } from "firebase/auth";
 import {
   getFirestore,
@@ -36,7 +36,9 @@ const firestore = getFirestore(firebaseApp);
 const auth = getAuth(firebaseApp);
 
 const db = getFirestore(firebaseApp); // Corrected import
-setPersistence(auth, browserSessionPersistence);
+setPersistence(auth, browserLocalPersistence).catch((error) => {
+  console.error("Failed to set persistence:", error.message);
+});
 console.log(firebaseConfig);
 console.log(storage);
 

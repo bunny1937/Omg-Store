@@ -1,20 +1,36 @@
 const cartReducer = (state, action) => {
   switch (action.type) {
+    case "SET_CART_ITEMS":
+      return {
+        ...state,
+        cartItems: action.payload,
+        cartQuantity: action.payload.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        ),
+      };
+
+    case "SET_LOADING":
+      return {
+        ...state,
+        isLoading: action.payload,
+      };
     case "ADD_TO_CART": {
       const product = action.payload;
-      const existingItem = state.cartItems.find(
-        (item) => item.id === product.id
+      const existingItemIndex = state.cartItems.findIndex(
+        (item) => item.uniqueItemId === product.uniqueItemId
       );
 
-      if (existingItem) {
-        // If item exists, update its quantity
+      if (existingItemIndex > -1) {
+        // If item with the same ID and size exists, update its quantity
+        const updatedCartItems = state.cartItems.map((item, index) =>
+          index === existingItemIndex
+            ? { ...item, quantity: item.quantity + product.quantity }
+            : item
+        );
         return {
           ...state,
-          cartItems: state.cartItems.map((item) =>
-            item.id === product.id
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          ),
+          cartItems: updatedCartItems,
         };
       } else {
         // If item doesn't exist, add to cart
@@ -28,22 +44,7 @@ const cartReducer = (state, action) => {
     case "INIT_CART": {
       return {
         ...state,
-        cartItems: action.payload || [], // Update itemTotal
-      };
-    }
-
-    case "SET_CART_ITEMS":
-      return { ...state, cartItems: action.payload };
-
-    case "REMOVE_FROM_CART": {
-      const { itemId, size } = action.payload;
-      const updatedCartItems = state.cartItems.filter(
-        (item) => !(item.id === itemId && (item.size || "N/A") === size)
-      );
-
-      return {
-        ...state,
-        cartItems: updatedCartItems,
+        cartItems: action.payload || [],
       };
     }
 
@@ -54,11 +55,12 @@ const cartReducer = (state, action) => {
       };
     }
 
-    case "INCREMENT": {
-      const { itemId } = action.payload;
+    case "REMOVE_FROM_CART": {
+      const { itemId, size } = action.payload;
+      const uniqueItemId = `${itemId}-${size}`;
 
-      const updatedCartItems = state.cartItems.map((item) =>
-        item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
+      const updatedCartItems = state.cartItems.filter(
+        (item) => item.uniqueItemId !== uniqueItemId
       );
 
       return {
@@ -67,20 +69,29 @@ const cartReducer = (state, action) => {
       };
     }
 
-    case "DECREMENT": {
-      const { itemId } = action.payload;
-
-      const updatedCartItems = state.cartItems
-        .map((item) =>
-          item.id === itemId && item.quantity > 1
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0);
-
+    case "INCREMENT": {
+      const { uniqueItemId } = action.payload;
       return {
         ...state,
-        cartItems: updatedCartItems,
+        cartItems: state.cartItems.map((item) =>
+          item.uniqueItemId === uniqueItemId
+            ? { ...item, quantity: (item.quantity || 0) + 1 }
+            : item
+        ),
+      };
+    }
+
+    case "DECREMENT": {
+      const { uniqueItemId } = action.payload;
+      return {
+        ...state,
+        cartItems: state.cartItems
+          .map((item) =>
+            item.uniqueItemId === uniqueItemId
+              ? { ...item, quantity: Math.max((item.quantity || 0) - 1, 0) }
+              : item
+          )
+          .filter((item) => item.quantity > 0),
       };
     }
 

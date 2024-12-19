@@ -11,6 +11,7 @@ import Category from "./Category/Category";
 import Lenis2 from "../shoppingcart/components/Lenis2";
 import Landingpage from "../shoppingcart/components/Landingpage";
 import Gsap from "../shoppingcart/components/Gsap";
+import SuggestionComponent from "../shoppingcart/components/Suggestion";
 export default function Heroui() {
   return (
     <>
@@ -19,6 +20,7 @@ export default function Heroui() {
       */}
       {/* <Lenis /> */}
       <Landingpage />
+      <SuggestionComponent />
       <BentoGrid />
       <Lenis2 />
       {/* <AniComponent1 />*/}

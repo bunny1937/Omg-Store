@@ -4,7 +4,7 @@ import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { firebaseApp } from "../../../db/Firebase"; // Adjust this path to your Firebase initialization
 import { motion } from "framer-motion"; // For animations
-
+import "./Userstyles/Profile.css";
 const db = getFirestore(firebaseApp);
 const auth = getAuth(firebaseApp);
 function Profile() {
@@ -130,22 +130,16 @@ function Profile() {
       </div>
       <div className="button-group">
         {editing ? (
-          <button onClick={updateUserDetails} className="button save-button">
+          <button onClick={updateUserDetails} className="save-button">
             Save
           </button>
         ) : (
-          <button
-            onClick={() => setEditing(true)}
-            className="button edit-button"
-          >
+          <button onClick={() => setEditing(true)} className="edit-button">
             Edit
           </button>
         )}
         {editing && (
-          <button
-            onClick={() => setEditing(false)}
-            className="button cancel-button"
-          >
+          <button onClick={() => setEditing(false)} className="cancel-button">
             Cancel
           </button>
         )}

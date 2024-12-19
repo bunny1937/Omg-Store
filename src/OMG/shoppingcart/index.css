@@ -50,7 +50,7 @@ svg {
   src: url(/public/Fonts/Montserrat-VariableFont_wght.ttf);
 }
 
-.container {
+.home-container {
   width: 100%;
 }
 
@@ -79,18 +79,18 @@ svg {
   height: auto;
   position: relative;
 
-  border-radius: 2.5% 5% 4% 2% / 2% 4% 2% 2%;
+  border-radius: 5px;
   width: auto;
   /* box-shadow: 6px 7px 30px 0px #5c5c5c; */
 }
 
 /* Favorite Button */
-.btn-fav {
+/* .btn-fav {
   position: absolute;
   top: 0.3rem;
   right: 0.3rem;
-  width: 2.7rem; /* Match the width of the triangle */
-  height: 2.7rem; /* Match the height of the triangle */
+  width: 2.7rem;
+  height: 2.7rem; 
   background-color: white;
   border-radius: 40%;
   display: flex;
@@ -117,14 +117,14 @@ svg {
   background-size: contain;
   width: 1.5rem;
   height: 1.5rem;
-}
+} */
 
 .product_card_img {
   width: 100%;
-  border-radius: 5% 12% 2% 25% / 5% 12% 25% 0%;
+  border-radius: 6px;
   height: auto;
   overflow: hidden;
-  padding: 0.3rem;
+  padding: 0.3rem 0.3 0 0.3;
 }
 
 .product_card_img img {
@@ -161,173 +161,6 @@ svg {
   font-style: italic;
   transform: translateZ(60px); */
 }
-@media screen and (max-width: 1535px) {
-  .home_content {
-    grid-template-columns: repeat(4, minmax(200px, 1fr));
-  }
-  #home {
-    padding: 1rem;
-  }
-  .product_card {
-    width: auto;
-  }
-  .product_card_img {
-    height: auto;
-  }
-}
-
-@media screen and (min-width: 960px) and (max-width: 1279px) {
-  .container {
-    max-width: 100%;
-  }
-  .home_content {
-    grid-template-columns: repeat(4, minmax(180px, 1fr));
-  }
-  #home {
-    padding: 0.5rem;
-  }
-  .product_card {
-    width: auto;
-  }
-}
-
-@media screen and (min-width: 500px) and (max-width: 959px) {
-  .container {
-    max-width: 100%;
-  }
-  .home_content {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-  }
-  .product_card_img {
-    height: auto;
-  }
-  .product_card {
-    height: auto;
-  }
-}
-@media screen and (min-width: 500px) and (max-width: 615px) {
-  .home_content {
-    grid-template-columns: repeat(2, minmax(180px, 1fr));
-  }
-  .product_card_img {
-    height: auto;
-  }
-  .product_card {
-    height: auto;
-  }
-}
-@media screen and (max-width: 499px) {
-  #home {
-    padding: 0.5rem;
-  }
-  .home_content {
-    grid-template-columns: repeat(2, minmax(180px, 2fr));
-  }
-
-  .product_card_img {
-    height: auto;
-  }
-  .product_card {
-    height: auto;
-  }
-  .product_card h3 {
-    font-size: 1.2rem;
-  }
-  .product_card .title {
-    margin-left: 0.1rem;
-    font-size: 0.9rem;
-  }
-  .product_card .price {
-    font-size: 1.3rem;
-  }
-}
-@media screen and (max-width: 399px) {
-  #home {
-    padding: 0.5rem;
-  }
-
-  .home_content {
-    grid-template-columns: repeat(2, minmax(100px, 1fr));
-  }
-  .product_card h3 {
-    font-size: 1.1rem;
-  }
-  .product_card h4 {
-    margin-left: 0.1rem;
-    font-size: 1rem;
-  }
-  .product_card .price {
-    font-size: 1rem;
-  }
-  .product_card_img {
-    border-radius: 0 30% 0 0 / 0 20% 0 0;
-    width: auto;
-  }
-  .product_card {
-    height: auto;
-  }
-}
-/* Hover Effects */
-/* .card-actions {
-  position: absolute;
-  top: 10%;
-  right: 10%;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.product_card:hover .card-actions {
-  opacity: 1;
-  visibility: visible;
-}
-
-.hehe {
-  background-color: #b71d1d;
-  width: 30rem;
-  height: 30rem;
-  color: wheat;
-}
-
-
-.product_card .btn1,
-.btn2 {
-  background-color: #ffffff;
-  width: 3rem;
-  border-radius: 50%;
-  padding: 0.6rem;
-  font-size: 1rem;
-  height: 3rem;
-  transition: color 0.3s ease, transform 0.3s ease;
-}
-
-.product_card .btn1:hover,
-.btn2:hover {
-  color: #b71d1d; /* Change color on hover *
-  transform: scale(1.1); 
-}
-
-.product_card .btn.added {
-  color: green;
-}
-.fav-icon1 {
-  background-image: url(../shoppingcart/components/pages/photos/icon-heart.svg);
-
-  background-repeat: no-repeat;
-  height: 2.5rem;
-}
-.bag-icon1 {
-  background-image: url(../shoppingcart/components/pages/photos/icon-cart.svg);
-
-  background-repeat: no-repeat;
-  height: 2.5rem;
-} */
-
-/******** -Filter- **********/
-
-/* Add this to your CSS file */
 /* Filter Section */
 .filter-section button {
   height: 3rem;
@@ -364,6 +197,7 @@ svg {
   float: right;
   cursor: pointer;
   background: none;
+  margin-top: -2.2rem;
   border: none;
 }
 
@@ -467,3 +301,180 @@ svg {
 .filter-label input {
   cursor: pointer;
 }
+
+@media screen and (max-width: 1535px) {
+  .home_content {
+    grid-template-columns: repeat(4, minmax(200px, 1fr));
+  }
+  #home {
+    padding: 1rem;
+  }
+  .product_card {
+    width: auto;
+  }
+  .product_card_img {
+    height: auto;
+  }
+}
+
+@media screen and (min-width: 960px) and (max-width: 1279px) {
+  .container {
+    max-width: 100%;
+  }
+  .home_content {
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+  }
+  #home {
+    padding: 0.5rem;
+  }
+  .product_card {
+    width: auto;
+  }
+}
+
+@media screen and (min-width: 500px) and (max-width: 959px) {
+  .container {
+    max-width: 100%;
+  }
+  .home_content {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+  }
+  .product_card_img {
+    height: auto;
+  }
+  .product_card {
+    height: auto;
+  }
+}
+@media screen and (max-width: 550px) {
+  .filter-container {
+    top: 6.3rem;
+  }
+}
+@media screen and (min-width: 500px) and (max-width: 615px) {
+  .home_content {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+  .product_card_img {
+    height: auto;
+  }
+  .product_card {
+    height: auto;
+  }
+}
+@media screen and (max-width: 499px) {
+  #home {
+    padding: 0.5rem;
+  }
+  .home_content {
+    grid-template-columns: repeat(2, minmax(180px, 2fr));
+  }
+
+  .product_card_img {
+    height: auto;
+  }
+  .product_card {
+    height: auto;
+  }
+  .product_card h3 {
+    font-size: 1.2rem;
+  }
+  .product_card .title {
+    margin-left: 0.1rem;
+    font-size: 0.9rem;
+  }
+  .product_card .price {
+    font-size: 1.3rem;
+  }
+}
+@media screen and (max-width: 399px) {
+  #home {
+    padding: 0.5rem;
+  }
+
+  .home_content {
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+  .product_card h3 {
+    font-size: 1.1rem;
+  }
+  .product_card h4 {
+    margin-left: 0.1rem;
+    font-size: 1rem;
+  }
+  .product_card .price {
+    font-size: 1rem;
+  }
+  .product_card_img {
+    width: auto;
+  }
+  .product_card {
+    height: auto;
+  }
+  .filter-section button {
+    width: 14%;
+    height: 2rem;
+  }
+}
+/* Hover Effects */
+/* .card-actions {
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.product_card:hover .card-actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hehe {
+  background-color: #b71d1d;
+  width: 30rem;
+  height: 30rem;
+  color: wheat;
+}
+
+
+.product_card .btn1,
+.btn2 {
+  background-color: #ffffff;
+  width: 3rem;
+  border-radius: 50%;
+  padding: 0.6rem;
+  font-size: 1rem;
+  height: 3rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.product_card .btn1:hover,
+.btn2:hover {
+  color: #b71d1d; /* Change color on hover *
+  transform: scale(1.1); 
+}
+
+.product_card .btn.added {
+  color: green;
+}
+.fav-icon1 {
+  background-image: url(../shoppingcart/components/pages/photos/icon-heart.svg);
+
+  background-repeat: no-repeat;
+  height: 2.5rem;
+}
+.bag-icon1 {
+  background-image: url(../shoppingcart/components/pages/photos/icon-cart.svg);
+
+  background-repeat: no-repeat;
+  height: 2.5rem;
+} */
+
+/******** -Filter- **********/
+
+/* Add this to your CSS file */

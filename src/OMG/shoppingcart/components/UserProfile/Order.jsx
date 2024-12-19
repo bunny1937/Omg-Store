@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { firebaseApp } from "../../../db/Firebase"; // Adjust this path to your Firebase initialization
 import "./Userstyles/Order.css";
 import { FiArrowRight, FiArrowLeft } from "react-icons/fi"; // Adjust this import as needed
-import Sidebar from "./Sidebar";
+import Breadcrumb from "./Breadcrumb";
 
 const db = getFirestore(firebaseApp);
 const auth = getAuth(firebaseApp);

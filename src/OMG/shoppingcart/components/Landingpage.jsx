@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 function Landingpage() {
   return (
     <div className="container">
-      <header className="header">
+      {/* <header className="header">
         <div>
           <svg
             className="wavy-line"
@@ -59,10 +59,10 @@ function Landingpage() {
               Lorem ipsum dolor sit amet consectetur
             </textPath>
           </text>
-        </svg> */}
-      </header>
+        </svg> 
+      </header> */}
 
-      <section className="hero">
+      <section className="main-page">
         <h1>Your ultimate Fashion Outfits</h1>
         <p>Modern Asthetics meets the Divine Faith meets the versitality</p>
         <button className="explore-btn">

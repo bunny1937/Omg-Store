@@ -10,29 +10,30 @@
 }
 
 .product-card {
-  width: 18rem;
-  height: 19rem;
+  width: 12rem;
+  height: 17rem;
   margin: 10px;
-  padding: 10px;
+  padding: 2px;
+  background-color: #28361836;
   border: 1px solid #ddd;
-  border-radius: 10px;
+  border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .product-card img {
   width: 100%;
-  height: 15rem;
-  object-fit: cover;
+  height: 12rem;
+  object-fit: contain;
   border-radius: 10px;
 }
-
-.product-card h3 {
-  font-size: 16px;
-  margin-bottom: 10px;
+.product-card h2 {
+  font-size: 1.2rem;
+  font-weight: 400;
 }
 
 .product-card p {
   font-size: 14px;
+  font-weight: 600;
   color: #666;
 }
 
@@ -41,46 +42,44 @@
 /* For screens between 1024px and 750px */
 @media (max-width: 1024px) and (min-width: 750px) {
   .product-card {
-    width: 40%;
+    width: 20%;
     height: 100%; /* Adjust width to take up more space */
   }
 }
 
 /* For screens between 750px and 550px */
-@media (max-width: 750px) and (min-width: 550px) {
+@media (max-width: 750px) and (min-width: 640px) {
   .product-card {
-    width: 46%;
+    width: 30%;
     height: 100%; /* Adjust width to take up more space */
   }
 }
 
 /* For screens between 550px and 350px */
-@media (max-width: 550px) and (min-width: 350px) {
+@media (max-width: 640px) and (min-width: 530px) {
   .product-card {
-    width: 60%;
-    height: 100%; /* Full width for smaller screens */
+    width: 46%;
+    height: 100%;
+    border-radius: 10px; /* Full width for smaller screens */
   }
-  .products-list {
-    justify-content: center;
+  .product-card img {
+    width: 100%;
+    height: 14rem;
+    object-fit: contain;
+    border-radius: 30px;
   }
 }
 
 /* For screens below 350px */
-@media (max-width: 350px) {
+@media (max-width: 530px) {
   .product-card {
-    width: 100%; /* Full width for the smallest screens */
+    width: 45%; /* Full width for the smallest screens */
     height: auto; /* Allow height to adjust based on content */
   }
-
-  .product-card img {
-    height: 10rem; /* Adjust image height for smaller screens */
-  }
-
-  .product-card h3 {
-    font-size: 14px; /* Smaller font size for titles */
-  }
-
-  .product-card p {
-    font-size: 12px; /* Smaller font size for descriptions */
+}
+@media (max-width: 431px) {
+  .product-card {
+    width: 42%; /* Full width for the smallest screens */
+    height: auto; /* Allow height to adjust based on content */
   }
 }

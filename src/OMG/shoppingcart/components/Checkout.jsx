@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiShoppingCart, FiCreditCard, FiPackage } from "react-icons/fi";
 import { FaPlus, FaMinus } from "react-icons/fa";
@@ -27,6 +27,8 @@ const PremiumCheckout = () => {
     pinCode: "",
     state: "",
   });
+  const [testInputValue, setTestInputValue] = useState("");
+
   const [coupon, setCoupon] = useState("");
   const navigate = useNavigate();
   const { cartItems, updateCartItem } = useContext(cartContext);
@@ -73,7 +75,24 @@ const PremiumCheckout = () => {
       console.error("Error fetching addresses:", error);
     }
   };
-
+  const renderTestInput = () => (
+    <div>
+      <h1>Test Input</h1>
+      <input
+        type="text"
+        value={testInputValue}
+        onChange={(e) => {
+          console.log("Changing:", e.target.value);
+          setTestInputValue(e.target.value);
+        }}
+        onTouchStart={() => console.log("Touch start")}
+        onTouchMove={() => console.log("Touch move")}
+        onTouchEnd={() => console.log("Touch end")}
+        placeholder="Type here"
+      />
+      <p>Current value: {testInputValue}</p>
+    </div>
+  );
   const handleQuantityChange = (item, newQuantity) => {
     updateCartItem(item.id, newQuantity);
   };
@@ -139,22 +158,10 @@ const PremiumCheckout = () => {
   };
 
   const CartSection = () => (
-    <motion.div
-      className="cart-section"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="cart-section">
       <h2>Your Cart</h2>
       {cartItems.map((item) => (
-        <motion.div
-          className="cart-item"
-          key={item.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+        <div className="cart-item" key={item.id}>
           <img src={item.Img} alt={item.Name} className="cart-item-img" />
           <div className="cart-item-info">
             <h3>{item.Name}</h3>
@@ -179,19 +186,13 @@ const PremiumCheckout = () => {
           <p className="cart-item-total">
             ₹ {(item.price * item.quantity).toLocaleString()}
           </p>
-        </motion.div>
+        </div>
       ))}
-    </motion.div>
+    </div>
   );
 
   const AddressSection = React.memo(() => (
-    <motion.div
-      className="address-section"
-      initial={{ opacity: 0, x: "100%" }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: "100%" }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="address-section">
       <h2>Shipping Address</h2>
       {savedAddresses.map((address) => (
         <div
@@ -210,7 +211,11 @@ const PremiumCheckout = () => {
         {showAddressForm ? "Cancel" : "Add New Address"}
       </button>
       {showAddressForm && (
-        <form className="address-form" onSubmit={handleAddressSubmit}>
+        <form
+          className="address-form"
+          onSubmit={handleAddressSubmit}
+          autoComplete="off"
+        >
           <input
             type="text"
             name="name"
@@ -331,7 +336,7 @@ const PremiumCheckout = () => {
           <button type="submit">Save Address</button>
         </form>
       )}
-    </motion.div>
+    </div>
   ));
 
   const PaymentSection = () => {
@@ -341,13 +346,7 @@ const PremiumCheckout = () => {
     );
 
     return (
-      <motion.div
-        className="payment-section"
-        initial={{ opacity: 0, x: "100%" }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: "100%" }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="payment-section">
         <h2>Payment</h2>
         <div className="coupon-section">
           <input
@@ -381,7 +380,7 @@ const PremiumCheckout = () => {
         >
           Pay Now
         </motion.button>
-      </motion.div>
+      </div>
     );
   };
 
@@ -434,6 +433,7 @@ const PremiumCheckout = () => {
               transition={{ duration: 0.3 }}
             >
               <AddressSection />
+              {renderTestInput()}
             </motion.div>
           )}
           {currentStep === 3 && (

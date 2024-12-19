@@ -31,7 +31,7 @@ const SimilarProducts = ({ category, id }) => {
         );
 
         // Shuffle the otherCategoryProducts array
-        const shuffledOtherCategoryProducts = otherCategoryProducts.sort(
+        const shuffledOtherCategoryProducts = [...otherCategoryProducts].sort(
           () => Math.random() - 0.5
         );
 
@@ -39,11 +39,16 @@ const SimilarProducts = ({ category, id }) => {
         const numSimilarProducts = 5;
 
         // Calculate number of products to display from the same category (70%)
-        const numSameCategoryProducts = Math.floor(numSimilarProducts * 0.7);
+        const numSameCategoryProducts = Math.min(
+          Math.floor(numSimilarProducts * 0.7),
+          sameCategoryProducts.length
+        );
 
         // Calculate number of products from other categories to display (30%)
-        const numOtherCategoryProducts =
-          numSimilarProducts - numSameCategoryProducts;
+        const numOtherCategoryProducts = Math.min(
+          numSimilarProducts - numSameCategoryProducts,
+          shuffledOtherCategoryProducts.length
+        );
 
         // Combine products
         const finalSimilarProducts = [
@@ -66,7 +71,11 @@ const SimilarProducts = ({ category, id }) => {
       <div className="products-list">
         {similarProducts.map((product) => (
           <div key={product.id} className="product-card">
-            <img src={product.img} alt={product.title} />
+            {product.ImgUrls && product.ImgUrls.length > 0 ? (
+              <img src={product.ImgUrls[0]} alt={product.Name} />
+            ) : (
+              <p>No image available</p>
+            )}
             <Link to={`/Details/${product.id}`}>
               <h2>{product.Name}</h2>
             </Link>

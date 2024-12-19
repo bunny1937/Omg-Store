@@ -3,6 +3,7 @@ import {
   getFirestore,
   doc,
   setDoc,
+  getDoc,
   deleteDoc,
   collection,
   getDocs,
@@ -63,7 +64,7 @@ const FavouritesProvider = ({ children }) => {
       return;
     }
 
-    if (!item || !item.id || !item.size) {
+    if (!item || !item.id || !item.size || !item.quantity) {
       console.error("Invalid item or missing size:", item);
       return;
     }

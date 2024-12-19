@@ -1,10 +1,11 @@
 import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   createUserWithEmailAndPassword,
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut,
 } from "firebase/auth";
 import { firebaseApp } from "../db/Firebase";
 import {
@@ -20,20 +21,22 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import UserContext from "./UserContext";
 import "./SignUp.css";
 
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 
-function SignUp() {
+function SignUp({ onClose, open, onSignUpSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [openDialog, setOpenDialog] = useState(false); // Dialog state
+  const { setUser } = useContext(UserContext);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
   const provider = new GoogleAuthProvider();
 
   const signup = async () => {
@@ -47,8 +50,12 @@ function SignUp() {
         password
       );
       const user = userCredential.user;
+      setUser(user);
+      const sanitizedId = `${firstName.trim().toLowerCase()}-${lastName
+        .trim()
+        .toLowerCase()}-${phoneNumber}`.replace(/[^a-z0-9-]/g, "");
 
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(db, "users", sanitizedId), {
         uid: user.uid,
         email: user.email,
         firstName,
@@ -59,9 +66,18 @@ function SignUp() {
 
       alert("Signup Successful");
       resetForm();
+      await signOut(auth);
+      if (onSignUpSuccess) {
+        onSignUpSuccess();
+      } else {
+        navigate("/SignIn");
+      }
     } catch (error) {
       console.log(error);
       alert("Signup Failed");
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,7 +85,7 @@ function SignUp() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
+      setUser(user);
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (!userDoc.exists()) {
         await setDoc(doc(db, "users", user.uid), {
@@ -82,38 +98,13 @@ function SignUp() {
         });
       }
 
-      // Check if essential fields are missing
-      const userData = userDoc.data();
-      if (
-        !userData ||
-        !userData.firstName ||
-        !userData.lastName ||
-        !userData.phoneNumber
-      ) {
-        setOpenDialog(true);
-      }
+      onClose && onClose(); // Close the modal
     } catch (error) {
       console.log(error);
       alert("Google Signup Failed");
-    }
-  };
-
-  const handleDialogSubmit = async () => {
-    try {
-      const user = auth.currentUser;
-      if (user) {
-        await updateDoc(doc(db, "users", user.uid), {
-          firstName,
-          lastName,
-          phoneNumber,
-        });
-        setOpenDialog(false);
-        alert("Profile Updated Successfully");
-        navigate("/Home");
-      }
-    } catch (error) {
-      console.log(error);
-      alert("Failed to update profile");
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,107 +117,75 @@ function SignUp() {
   };
 
   return (
-    <div className="signup-container">
-      <div className="logo"></div>
-      <div className="signup-form">
-        <div className="header">
-          <h1 className="title">Signup</h1>
-        </div>
-        <div className="input-field">
-          <input
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            placeholder="First Name"
-            className="input"
-          />
-        </div>
-        <div className="input-field">
-          <input
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder="Last Name"
-            className="input"
-          />
-        </div>
-        <div className="input-field">
-          <input
-            type="text"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="Phone Number"
-            className="input"
-          />
-        </div>
-        <div className="input-field">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="input"
-          />
-        </div>
-        <div className="input-field">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            className="input"
-          />
-        </div>
-        <div className="button-field">
-          <button onClick={signup} className="btn">
-            Signup
-          </button>
-        </div>
-        <div className="button-field">
-          <button onClick={signInWithGoogle} className="btn google-btn">
-            Sign Up with Google
-          </button>
-        </div>
-        <div className="login-link">
-          <h2>
-            Already have an account? <Link to={"/SignIn"}>Sign In</Link>
-          </h2>
+    <div className={`modal ${open ? "open" : ""}`}>
+      <div className="signup-container">
+        <div className="logo"></div>
+        <div className="signup-form">
+          <div className="header">
+            <h1 className="title">Signup</h1>
+          </div>
+          <div className="input-field">
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="First Name"
+              className="input"
+            />
+          </div>
+          <div className="input-field">
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Last Name"
+              className="input"
+            />
+          </div>
+          <div className="input-field">
+            <input
+              type="text"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Phone Number"
+              className="input"
+            />
+          </div>
+          <div className="input-field">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              className="input"
+            />
+          </div>
+          <div className="input-field">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="input"
+            />
+          </div>
+          <div className="button-field">
+            <button onClick={signup} className="btn">
+              Signup
+            </button>
+          </div>
+          <div className="button-field">
+            <button onClick={signInWithGoogle} className="btn google-btn">
+              Sign Up with Google
+            </button>
+          </div>
+          <div className="login-link">
+            <h2>
+              Already have an account? <Link to={"/SignIn"}>Sign In</Link>
+            </h2>
+          </div>
         </div>
       </div>
-
-      {/* Dialog Box */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Complete Your Profile</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="First Name"
-            fullWidth
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            label="Last Name"
-            fullWidth
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            margin="normal"
-          />
-          <TextField
-            label="Phone Number"
-            fullWidth
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            margin="normal"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleDialogSubmit} color="primary">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 }

@@ -1,35 +1,52 @@
-import React, { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { firebaseApp } from "../db/Firebase";
+
+const auth = getAuth(firebaseApp); // Initialize the auth instance
+
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true); // For managing the initial loading state
 
+  // Listen to authentication state changes
   useEffect(() => {
-    // Check if a user is already logged in
-    const storedUser = JSON.parse(sessionStorage.getItem("user"));
-    const storedAdmin = JSON.parse(sessionStorage.getItem("isAdmin"));
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        setIsAdmin(firebaseUser.email === "admin@example.com"); // Set admin status
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+      }
+      setLoading(false); // Authentication check complete
+    });
 
-    if (storedUser) {
-      setUser(storedUser);
-      setIsAdmin(storedAdmin || false);
-    }
+    // Cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    // Set session storage whenever user or isAdmin changes
-    if (user) {
-      sessionStorage.setItem("user", JSON.stringify(user));
-      sessionStorage.setItem("isAdmin", JSON.stringify(isAdmin));
-    } else {
-      sessionStorage.removeItem("user");
-      sessionStorage.removeItem("isAdmin");
+  const signIn = async (email, password) => {
+    try {
+      const userCredential = await auth.signInWithEmailAndPassword(
+        email,
+        password
+      );
+      setUser(userCredential.user);
+      setIsAdmin(userCredential.user.email === "admin@example.com"); // Set admin status
+    } catch (error) {
+      throw error; // Rethrow the error to be handled by the calling component
     }
-  }, [user, isAdmin]);
+  };
 
   return (
-    <UserContext.Provider value={{ user, isAdmin, setUser, setIsAdmin }}>
-      {children}
+    <UserContext.Provider
+      value={{ user, isAdmin, signIn, setUser, setIsAdmin }}
+    >
+      {!loading && children}{" "}
+      {/* Render children only after authentication state is determined */}
     </UserContext.Provider>
   );
 };

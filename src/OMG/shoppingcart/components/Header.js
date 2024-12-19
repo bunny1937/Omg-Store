@@ -21,8 +21,25 @@ const Header = () => {
   const [showResults, setShowResults] = useState(false);
   const searchContainerRef = useRef(null);
   const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [categories, setCategories] = useState([]); // Dynamic categories
+  const [categories, setCategories] = useState([]);
+
+  const handleDropdown = () => {
+    setDropdown(!dropdown);
+  };
+
+  const closeDropdown = (e) => {
+    if (dropdown && !e.target.closest(".header-links")) {
+      setDropdown(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("click", closeDropdown);
+
+    return () => {
+      document.removeEventListener("click", closeDropdown);
+    };
+  }, [dropdown]);
 
   const logout = () => {
     localStorage.clear();
@@ -53,6 +70,13 @@ const Header = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    document.addEventListener("click", closeDropdown);
+
+    return () => {
+      document.removeEventListener("click", closeDropdown);
+    };
+  }, [dropdown]);
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
@@ -80,8 +104,6 @@ const Header = () => {
     };
     fetchCategories();
   }, []);
-  const topCategories = ["Tshirts", "Hoodies", "Oversize"]; // Adjust as needed
-  const bottomCategories = ["Pants", "Jeans"]; // Adjust as needed
 
   useEffect(() => {
     if (favouriteItems) {
@@ -89,7 +111,6 @@ const Header = () => {
     }
   }, [favouriteItems]);
 
-  const handleDropdown = () => setDropdown(!dropdown);
   const handleClick = () => setClick(!click);
   const closeMobileMenu = () => setClick(false);
 
@@ -134,73 +155,31 @@ const Header = () => {
         </div>
         <span style={{ color: "white" }}>
           <ul className={click ? "nav-menu active" : "nav-menu"}>
-            {/* Dropdown for Collections */}
-            <div className="dropdown-wrapper">
-              <div
-                className="dropdown-trigger"
-                onMouseEnter={() => setIsDropdownOpen(true)}
-                onMouseLeave={() => setIsDropdownOpen(false)}
-              >
-                <p className="hover-text">Collections</p>
-                <div className="underline"></div>
-              </div>
-
-              {isDropdownOpen && (
-                <div className="dropdown-content">
-                  {/* Top Categories */}
-                  <div className="dropdown-submenu">
-                    <h4 className="submenu-title">Top</h4>
-                    <ul>
-                      {categories
-                        .filter((category) => topCategories.includes(category))
-                        .map((category) => (
-                          <li key={category}>
-                            <Link
-                              to={`/category/${category}`}
-                              onClick={() => setIsDropdownOpen(false)}
-                            >
-                              {category}
-                            </Link>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
-
-                  {/* Bottom Categories */}
-                  <div className="dropdown-submenu">
-                    <h4 className="submenu-title">Bottom</h4>
-                    <ul>
-                      {categories
-                        .filter((category) =>
-                          bottomCategories.includes(category)
-                        )
-                        .map((category) => (
-                          <li key={category}>
-                            <Link
-                              to={`/category/${category}`}
-                              onClick={() => setIsDropdownOpen(false)}
-                            >
-                              {category}
-                            </Link>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
-
             <div className="header-links">
               <Link to={"/Home"} className="all-products">
                 <p>All Products</p>
               </Link>
             </div>
             <div className="header-links">
-              <Link to={"/Contact"} className="navbar-links">
+              <Link to="/category/Oversize" className="dropdown-link">
+                Oversize
+              </Link>
+            </div>
+            <div className="header-links">
+              <Link to="/category/Hoodies" className="dropdown-link">
+                Hoodie
+              </Link>
+            </div>
+            <div className="header-links">
+              <Link to={"/Support"} className="navbar-links">
                 <p> Contact</p>
               </Link>
             </div>
-
+            <div className="header-links">
+              <Link to={"/Favourites"}>
+                <p className="favourites-text">Favourites</p>
+              </Link>
+            </div>
             {/* <>
             <button onClick={() => setShowComponent1(true)}>Component1</button>
             {showComponent1 && (
@@ -256,13 +235,18 @@ const Header = () => {
             <ul className="dropdown-menu">
               {user ? (
                 <>
-                  <li onClick={logout}>Logout</li>
-                  <Link to={"/UserProfile"}>
+                  {/* <Link to={"/UserProfile"}>
                     <p>Profile</p>
                   </Link>
                   <Link to={"/UserProfile1"}>
                     <p>ProfileNew</p>
+                  </Link> */}
+                  <Link to={"/Profile1"}>
+                    <p>Profile</p>
                   </Link>
+                  <p style={{ cursor: "pointer" }} onClick={logout}>
+                    Logout
+                  </p>
                 </>
               ) : (
                 <>

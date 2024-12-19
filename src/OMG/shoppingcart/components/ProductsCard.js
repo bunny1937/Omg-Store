@@ -7,46 +7,62 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const ProductsCard = ({ id, Name, Category, price, ImgUrls }) => {
-  const { addFavourite } = useContext(FavouritesContext);
-  const [isFavourite, setIsFavourite] = useState(false);
-  const [hovered, setHovered] = useState(false);
+  // const { addFavourite } = useContext(FavouritesContext);
+  // const [isFavourite, setIsFavourite] = useState(false);
+  // const [hovered, setHovered] = useState(false);
 
-  const handleAddToFavourites = () => {
-    const item = { id, Name, Category, price, ImgUrls };
-    addFavourite(item);
-    setIsFavourite(true);
+  // const handleAddToFavourites = () => {
+  //   const item = { id, Name, Category, price, ImgUrls };
+  //   addFavourite(item);
+  //   setIsFavourite(true);
 
-    setTimeout(() => {
-      setIsFavourite(false);
-    }, 3000);
-  };
-
-  // const settings = {
-  //   infinite: true,
-  //   autoplay: true,
-  //   autoplaySpeed: 4000,
-  //   arrows: false,
-  //   cssEase: "linear",
-  //   speed: 500,
-  //   slidesToShow: 1,
-  //   slidesToScroll: 1,
+  //   setTimeout(() => {
+  //     setIsFavourite(false);
+  //   }, 3000);
   // };
-  const mainImg = ImgUrls && ImgUrls[0];
-  const hoverImg = ImgUrls && ImgUrls[1];
+
+  const settings = {
+    infinite: true,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    arrows: false,
+    cssEase: "linear",
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
+  // const mainImg = ImgUrls && ImgUrls[0];
+  // const hoverImg = ImgUrls && ImgUrls[1];
 
   return (
     <>
       <div
         className="product_card"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        // onMouseEnter={() => setHovered(true)}
+        // onMouseLeave={() => setHovered(false)}
       >
-        <div className="product_card_img">
+        {/* <div className="product_card_img">
           {mainImg && (
             <img
               src={hovered && hoverImg ? hoverImg : mainImg}
               alt={Name || "Product Image"}
             />
+          )}
+        </div> */}
+        <div className="product_card_img">
+          {ImgUrls && ImgUrls.length > 0 ? (
+            <Slider {...settings}>
+              {ImgUrls.map((imgUrl, index) => (
+                <div key={index}>
+                  <img
+                    src={imgUrl}
+                    alt={`${Name || "Product Image"} ${index + 1}`}
+                  />
+                </div>
+              ))}
+            </Slider>
+          ) : (
+            <div>No Images Available</div>
           )}
         </div>
         <div className="details-btn">
@@ -60,12 +76,12 @@ const ProductsCard = ({ id, Name, Category, price, ImgUrls }) => {
           <h3 className="price">₹ {price.toLocaleString()}</h3>
         </div>
         <h4>{Category}</h4>
-        <button
+        {/* <button
           className={`btn-fav ${isFavourite ? "favourited" : ""}`}
           onClick={handleAddToFavourites}
         >
           <div className="fav-icon1"></div>
-        </button>
+        </button> */}
         {/* <div className="card-actions">
           <button
             type="button"

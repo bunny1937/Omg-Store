@@ -109,12 +109,12 @@ input.nosubmit {
 }
 .dropdown-menu {
   position: absolute; /* Position dropdown absolute to its container */
-  top: 4rem; /* Adjust as needed */
-  right: 4rem; /* Align to the right edge of the container */
-  width: 6rem;
+  top: 5rem; /* Adjust as needed */
+  right: 8rem; /* Align to the right edge of the container */
+  width: 7rem;
   text-align: center;
-  color: #344e41;
-  background-color: #e9e8e8;
+  color: #ffffff;
+  background-color: #38423a;
   border-radius: 10px;
   padding: 10px;
   z-index: 1;
@@ -153,8 +153,8 @@ input.nosubmit {
   background-color: darkred;
   color: #fff;
   position: absolute;
-  right: 16px;
-  top: 25px;
+  right: 14px;
+  top: 24px;
   line-height: 1;
   font-size: 0.8rem;
   margin: 10px 0 0 0;
@@ -229,8 +229,10 @@ input.nosubmit {
 
 .product-info h2 {
   margin-bottom: 0.3rem;
+  padding: 0 10px;
   font-size: 1.3rem;
   font-weight: 450;
+  color: #111 !important;
 }
 /* 
 .product-info p {
@@ -274,7 +276,7 @@ input.nosubmit {
 
 /* Dropdown Content */
 .dropdown-content {
-  display: none;
+  display: block;
   position: absolute;
   top: 2.5rem;
   left: 0;
@@ -283,12 +285,20 @@ input.nosubmit {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 10px;
   min-width: 200px;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none; /* Prevent accidental hiding */
 }
 
-.dropdown-wrapper:hover .dropdown-content {
-  display: block;
+.dropdown-wrapper:hover .dropdown-content,
+.dropdown-wrapper .dropdown-content.active {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto; /* Enable interaction */
 }
-
 .submenu-title {
   font-size: 1.2rem;
   font-weight: bold;
@@ -434,7 +444,7 @@ input.nosubmit {
   }
   .header-links > input {
     border-radius: 25px;
-    width: auto;
+    width: 100%;
     border-bottom: 6px solid black;
     height: 2.7rem;
     background-color: #dbdbde;
@@ -447,7 +457,7 @@ input.nosubmit {
     background: #5e6b61;
     left: 0;
     width: 40%;
-    color: #f2e4d7;
+    color: #111;
     height: 100vh;
     opacity: 1;
     transition: all 0.5s ease;
@@ -550,7 +560,7 @@ input.nosubmit {
     margin: 0;
     position: absolute;
     top: -1.3rem;
-    margin-left: -2rem;
+    margin-left: -3rem;
     width: 4.5rem;
   }
   .search-join {
@@ -607,12 +617,10 @@ input.nosubmit {
   }
 }
 
-@media screen and (max-width: 500px) and (min-width: 400px) {
-}
 @media screen and (max-width: 398px) and (min-width: 200px) {
   .navbar-logo {
     width: 4rem;
-    margin-left: -2rem;
+    margin-left: -3rem;
     position: absolute;
     top: -1.3rem;
   }

@@ -1,7 +1,6 @@
 // App.js
 import "./App.css";
-import React from "react";
-import { ReactLenis } from "lenis/react";
+import React, { useRef } from "react";
 import Header from "./OMG/shoppingcart/components/Header";
 import Home from "./OMG/shoppingcart/pages/Home";
 import Heroui from "./OMG/Hero/Heroui";
@@ -23,17 +22,19 @@ import Payment from "./OMG/shoppingcart/components/Payment";
 import CategoryPage from "./OMG/Hero/Category/Categorypage";
 import UserProfile from "./OMG/Auth/UserProfile";
 import UserProfile1 from "./OMG/shoppingcart/components/UserProfile/UserProfile";
-import Order from "./OMG/shoppingcart/components/UserProfile/Order";
+import Sidebar from "./OMG/shoppingcart/components/UserProfile/Sidebar";
+import { BackButtonProvider } from "./OMG/BackHandle/BackContext";
+import Support from "./OMG/shoppingcart/components/UserProfile/Support/Support";
 import Profile from "./OMG/shoppingcart/components/UserProfile/Profile";
-import Address from "./OMG/shoppingcart/components/UserProfile/Address";
-import ReturnRefund from "./OMG/shoppingcart/components/UserProfile/Return-Refund";
-import TermsCo from "./OMG/shoppingcart/components/UserProfile/Terms-Co";
-import ContactUs from "./OMG/shoppingcart/components/UserProfile/Contact-Us";
+import Profile1 from "./OMG/shoppingcart/components/UserProfile/Basic/Basic";
+import Checkoutold from "./OMG/shoppingcart/components/Checkoutold";
 
 function App() {
+  const containerRef = useRef(null);
+
   return (
-    <ReactLenis root>
-      <React.StrictMode>
+    <>
+      <BackButtonProvider>
         <UserProvider>
           <ParallaxProvider>
             <FavouritesProvider>
@@ -43,24 +44,11 @@ function App() {
                   <Route path="/" element={<Heroui />} />
                   <Route path="/SignUp" element={<Signup />} />
                   <Route path="UserProfile" element={<UserProfile />} />
-                  <Route path="/UserProfile1" element={<UserProfile1 />} />
-                  <Route path="/UserProfile1/order" element={<Order />} />
-                  <Route path="/UserProfile1/profile" element={<Profile />} />
-                  <Route path="/UserProfile1/order" element={<Order />} />
-                  <Route
-                    path="/UserProfile1/favourites"
-                    element={<Favourites />}
-                  />
-                  <Route path="/UserProfile1/address" element={<Address />} />
-                  <Route
-                    path="/UserProfile1/returnrefund"
-                    element={<ReturnRefund />}
-                  />
-                  <Route path="/UserProfile1/termsco" element={<TermsCo />} />
-                  <Route
-                    path="/UserProfile1/contactus"
-                    element={<ContactUs />}
-                  />
+                  <Route path="/UserProfile1/*" element={<UserProfile1 />} />
+                  <Route path="/Profile1" element={<Profile1 />} />
+                  <Route path="/Support" element={<Support />} />
+
+                  <Route path="/Sidebar" element={<Sidebar />} />
                   <Route path="/SignIn" element={<SignIn />} />
                   <Route path="/Home" element={<Home />} />
                   <Route path="/Details/:id" element={<Details />} />
@@ -71,7 +59,7 @@ function App() {
                     element={<CategoryPage key={Math.random()} />}
                   />
                   <Route path="/Cart" element={<Cart />} />
-                  <Route path="/Checkout" element={<Checkout />} />
+                  <Route path="/Checkoutold" element={<Checkoutold />} />
                   <Route path="/Payment" element={<Payment />} />
                   <Route path="/AdminDash" element={<AdminDash />} />
                   {/* Protected Route for Admin */}
@@ -88,8 +76,8 @@ function App() {
             </FavouritesProvider>
           </ParallaxProvider>
         </UserProvider>
-      </React.StrictMode>
-    </ReactLenis>
+      </BackButtonProvider>
+    </>
   );
 }
 

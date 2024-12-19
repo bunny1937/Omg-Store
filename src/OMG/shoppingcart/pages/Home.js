@@ -108,7 +108,7 @@ const Home = () => {
   return (
     <>
       <section id="home">
-        <div className="container">
+        <div className="home-container">
           <div className="filter-section">
             <button onClick={handleToggleFilter}>Filters</button>
           </div>

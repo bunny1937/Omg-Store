@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { FaEdit } from "react-icons/fa"; // Import the Material Edit icon from React Icons
-
+import "./Userstyles/shipping.css";
 import {
   getFirestore,
   collection,
@@ -242,7 +242,10 @@ function Address() {
                 />
               </label>
               <div className="button-container">
-                <button onClick={() => saveShippingInfo(info, index)}>
+                <button
+                  onClick={() => saveShippingInfo(info, index)}
+                  className="save-button"
+                >
                   Save
                 </button>
                 <button
@@ -280,7 +283,7 @@ function Address() {
                 <strong>Pin Code:</strong> {info.pinCode}
               </p>
               <button
-                className="edit-button"
+                className="shipping-edit-button"
                 onClick={() => enableEditing(index)}
               >
                 <FaEdit />
