@@ -88,7 +88,6 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
       setUser(user); // Set user in the context
       alert("Signup Successful");
       resetForm();
-      await signOut(auth);
       if (onSignUpSuccess) {
         onSignUpSuccess();
       } else {
