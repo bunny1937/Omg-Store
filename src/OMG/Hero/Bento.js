@@ -1,63 +1,90 @@
-import React from "react";
+import React, { useState } from "react";
 import "./Bento.css";
+import Asthetics1 from "../shoppingcart/components/pages/photos/parallax/man-poses-in-light-colored-overcoat.jpg";
+import Asthetics2 from "../shoppingcart/components/pages/photos/parallax/man-wearing-white-shirt-with-tattoo-his-arm-words-hes-man-left_1045176-14545-transformed.jpeg";
+import Spiritual1 from "../shoppingcart/components/pages/photos/parallax/premium_photo-1690341214258-18cb88438805-transformed.jpeg";
+import Spiritual2 from "../shoppingcart/components/pages/photos/parallax/woman-4266713_640.jpg";
+const products = [
+  {
+    id: 1,
+    image: Asthetics1,
+    title: "Product 1",
+    description: "hsiahdaoidhwoidqwjodiqhwdiqwhdoiwh",
+  },
+  {
+    id: 2,
+    image: Asthetics2,
+    title: "Product 2",
+    description: "Description 2",
+  },
+  {
+    id: 3,
+    image: Spiritual1,
+    title: "Product 3",
+    description: "Description 3",
+  },
+  {
+    id: 4,
+    image: Spiritual2,
+    title: "Product 4",
+    description: "Description 4",
+  },
+  {
+    id: 5,
+    image: "image5.jpg",
+    title: "Product 5",
+    description: "Description 5",
+  },
+];
 
-const RefinedBentoGrid = () => {
+const ProductSlider = () => {
+  const [currentIndex, setCurrentIndex] = useState(2);
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % products.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? products.length - 1 : prevIndex - 1
+    );
+  };
+
   return (
-    <div className="bento-grid-refined">
-      {/* Row 1 */}
-      <div className="grid-item large creative-highlight">
-        <div className="overlay-content">
-          <h1>Awaken Your Spirit</h1>
-          <p>Modern, spiritual apparel that blends confidence and elegance.</p>
-        </div>
-      </div>
-      <div className="grid-item medium video">
-        <video autoPlay loop muted>
-          <source src="path_to_catalog_video.mp4" type="video/mp4" />
-        </video>
-      </div>
-      <div className="grid-item small illustration">
-        <img
-          src="path_to_minimal_illustration.svg"
-          alt="Minimalist Illustration"
-        />
-        <div className="overlay-text">Elevate Your Style</div>
-      </div>
+    <div className="slider-container">
+      <button className="slider-button left" onClick={handlePrev}>
+        &#10094;
+      </button>
+      <div className="slider">
+        {products.map((product, index) => {
+          const position =
+            (index - currentIndex + products.length) % products.length;
 
-      {/* Row 2 */}
-      <div className="grid-item medium image">
-        <img src="path_to_hoodie_image.jpg" alt="Hoodie Highlight" />
-        <div className="overlay-text">Oversized Hoodies</div>
-      </div>
-      <div className="grid-item small infographic">
-        <div className="info-content">
-          <h3>95% Sustainable</h3>
-          <p>Crafted with eco-friendly fabrics.</p>
-        </div>
-      </div>
-      <div className="grid-item medium fabric">
-        <img
-          src="path_to_fabric_texture.jpg"
-          alt="Premium Fabric Texture"
-          className="image"
-        />
-        <div className="overlay-text">Feel the Difference</div>
-      </div>
+          let className = "";
+          if (position === 0 || position === products.length - 1) {
+            className = "small";
+          } else if (position === 1 || position === products.length - 2) {
+            className = "medium";
+          } else if (position === 2) {
+            className = "big";
+          }
 
-      {/* Row 3 */}
-      <div className="grid-item large stats">
-        <h2>Customer Favorites</h2>
-        <ul>
-          <li>Relaxed Fit Pants</li>
-          <li>Oversized T-Shirts</li>
-          <li>Limited Edition Hoodies</li>
-        </ul>
+          return (
+            <div key={product.id} className={`slide ${className}`}>
+              <img src={product.image} alt={product.title} />
+            </div>
+          );
+        })}
       </div>
-      <div className="grid-item small testimonial">
-        <p>"This isn't just fashion; it's a way of life!"</p>
+      <button className="slider-button right" onClick={handleNext}>
+        &#10095;
+      </button>
+      <div className="description-container">
+        <h2>{products[currentIndex].title}</h2>
+        <p>{products[currentIndex].description}</p>
       </div>
     </div>
   );
 };
 
-export default RefinedBentoGrid;
+export default ProductSlider;

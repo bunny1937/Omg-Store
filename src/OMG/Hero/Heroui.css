@@ -5,6 +5,15 @@
   font-family: "Comfortaa", sans-serif;
   font-optical-sizing: auto;
 }
+
+.hero.hidden {
+  opacity: 0;
+}
+
+.hero.visible {
+  opacity: 1;
+  transition: opacity 1s ease-in;
+}
 /*
 .hero-container {
   background-color: #fff;

@@ -78,7 +78,7 @@
   border-radius: 25px;
   border: 1px solid black;
   height: 2.7rem;
-  width: auto;
+  width: 35rem;
   background-color: #dbdbde;
 }
 .header-links > input::placeholder {
@@ -348,9 +348,14 @@ input.nosubmit {
   top: 0.7rem;
   left: 1rem;
 }
-@media screen and (max-width: 1600px) and (min-width: 1300px) {
+@media screen and (max-width: 2200px) and (min-width: 1600px) {
+  .nav-menu {
+    width: 50vw;
+  }
+}
+@media screen and (max-width: 1600px) and (min-width: 1440px) {
   .header-links > input {
-    width: 30rem;
+    min-width: auto;
   }
   .nav-menu {
     width: 45vw;
@@ -360,12 +365,12 @@ input.nosubmit {
     height: 5rem;
   }
 }
-@media screen and (max-width: 1240px) and (min-width: 960px) {
+@media screen and (max-width: 1440px) and (min-width: 960px) {
   .header-links > input {
     width: auto;
   }
   .nav-menu {
-    width: 48vw;
+    width: 50vw;
   }
   .search-join {
     width: 100%;
@@ -380,7 +385,7 @@ input.nosubmit {
   .fav-icon {
     position: absolute;
     top: 50%;
-    right: 5rem; /* increased spacing */
+    right: 4.3rem; /* increased spacing */
     transform: translateY(-50%);
   }
   .user-icon {
