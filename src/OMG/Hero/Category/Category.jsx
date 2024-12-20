@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { firebaseApp } from "../../db/Firebase";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import "./Category.css";
 
 const Category = () => {
@@ -118,7 +117,7 @@ const Category = () => {
             className="scroll-button scroll-button-left"
             onClick={() => handleScroll(category, "left")}
           >
-            <ChevronLeft className="w-6 h-6" />
+            {"<"}
           </button>
           <div
             className="category-slider"
@@ -164,7 +163,7 @@ const Category = () => {
             className="scroll-button scroll-button-right"
             onClick={() => handleScroll(category, "right")}
           >
-            <ChevronRight className="w-6 h-6" />
+            {">"}
           </button>
         </div>
       </div>

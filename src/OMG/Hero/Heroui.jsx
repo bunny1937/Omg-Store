@@ -22,7 +22,7 @@ export default function Heroui() {
         <div className="hero">
           <MainPage />
           <SuggestionComponent />
-          <BentoGrid />
+          {/* <BentoGrid /> */}
           <Lenis2 />
           <div className="hero-container">
             <div className="hero-photos">
