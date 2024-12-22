@@ -12,12 +12,11 @@ import { firebaseApp } from "../../db/Firebase";
 import { Link, useParams } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { FaRegHeart } from "react-icons/fa";
 import SignIn from "../../Auth/SignIn";
 import SignInSignUpPopup from "../../Auth/Popupsignin";
 import UserContext from "../../Auth/UserContext";
+import toast, { Toaster } from "react-hot-toast";
 
 const db = getFirestore(firebaseApp);
 
@@ -35,7 +34,6 @@ const Details = () => {
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [shippingOpen, setShippingOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null); // For main image
-
   const [popupOpen, setPopupOpen] = useState(false); // Popup state
   const { user } = useContext(UserContext); // User context
 
@@ -68,15 +66,20 @@ const Details = () => {
   const { ImgUrls = [], Name, Description, price, Gender, Category } = product;
 
   const handleAddToCart = () => {
+    console.log("Selected size is:", selectedSize); // Debugging the size value
     console.log("Checking user context:", user); // Debugging user status
     if (!user) {
       console.log("User not logged in. Opening popup.");
-      setPopupOpen(true); // Open popup for unauthenticated users
+      toast.error("Please sign in to add items to your cart.");
+      setPopupOpen(true);
       return;
     }
 
     if (!selectedSize) {
-      toast.info("Please select a size before adding to cart.");
+      console.log("No size selected");
+      toast.dismiss(); // Dismiss any existing toasts
+      console.log("Selected size is:", selectedSize); // Should log null, undefined, or an empty value
+      toast.error("Please select a size before adding to cart.");
       return;
     }
 
@@ -94,6 +97,7 @@ const Details = () => {
       size: selectedSize,
     };
     addItem(item);
+    toast.success("Item successfully added to the cart!");
     setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
@@ -101,12 +105,18 @@ const Details = () => {
   };
 
   const handleAddToFavourites = () => {
+    console.log("Selected size is:", selectedSize); // Debugging the size value
+
     if (!user) {
-      setPopupOpen(true); // Open popup for unauthenticated users
+      setPopupOpen(true);
+      toast.error("Please sign in to add items to favourites.");
       return;
     }
+
     if (!selectedSize) {
-      toast.warning("Please select a size before adding to favourites.");
+      console.log("No size selected");
+      toast.dismiss(); // Dismiss any existing toasts
+      toast.error("Please select a size before adding to favourites.");
       return;
     }
 
@@ -121,6 +131,7 @@ const Details = () => {
     };
 
     addFavourite(favouriteItem);
+    toast.success("Item successfully added to favorites!");
     setIsFavourite(true);
   };
 
@@ -160,8 +171,29 @@ const Details = () => {
   //   slidesToShow: 1,
   //   slidesToScroll: 1,
   // };
+  const notify = () => toast("rukjaaaaaa");
+
   return (
     <>
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            fontSize: "16px",
+            borderRadius: "8px",
+            background: "#333",
+            color: "#fff",
+          },
+          success: {
+            style: { background: "#4caf50", color: "#fff" },
+            iconTheme: { primary: "#fff", secondary: "#4caf50" },
+          },
+          error: {
+            style: { background: "#f44336", color: "#fff" },
+            iconTheme: { primary: "#fff", secondary: "#f44336" },
+          },
+        }}
+      />
       <div className="details">
         <div className="details-container">
           <div className="img-section">
@@ -227,7 +259,16 @@ const Details = () => {
                 <p>{quantity}</p>
                 <button onClick={handleIncrement}>+</button>
               </div>
+
               <div className="cart-fav-box">
+                {!selectedSize && (
+                  <h6
+                    className="error-message"
+                    style={{ position: "absolute" }}
+                  >
+                    Size is required to add to cart.
+                  </h6>
+                )}
                 <button
                   type="button"
                   className={`btn1 ${isAdded ? "added" : ""}`}

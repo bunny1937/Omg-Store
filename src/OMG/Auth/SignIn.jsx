@@ -7,41 +7,19 @@ import {
   signInWithPopup,
   onAuthStateChanged,
 } from "firebase/auth";
-import { isMobile } from "react-device-detect";
-import {
-  signInWithRedirect,
-  getRedirectResult,
-  setPersistence,
-  browserSessionPersistence,
-} from "firebase/auth";
-
+import { setPersistence, browserSessionPersistence } from "firebase/auth";
+import toast, { Toaster } from "react-hot-toast";
 import { firebaseApp } from "../db/Firebase";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  updateDoc,
-  getDoc,
-} from "firebase/firestore";
-// import Dialog from "@mui/material/Dialog"; // For dialog box
-// import DialogActions from "@mui/material/DialogActions";
-// import DialogContent from "@mui/material/DialogContent";
-// import DialogTitle from "@mui/material/DialogTitle";
-// import Button from "@mui/material/Button";
-// import TextField from "@mui/material/TextField";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import UserContext from "./UserContext";
 import "./SignUp.css";
 
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
 
-function SignIn({ onClose, open }) {
+function SignIn({ open }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
   const { setUser, user, setIsAdmin } = useContext(UserContext);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -63,7 +41,7 @@ function SignIn({ onClose, open }) {
 
   const signIn = async () => {
     if (email === "" || password === "") {
-      return alert("Please fill all fields");
+      toast.error("Please fill all fields");
     }
     setLoading(true);
     setError(null);
@@ -87,20 +65,20 @@ function SignIn({ onClose, open }) {
 
         if (userData.role === "admin") {
           setIsAdmin(true);
+          toast.success("Welcome, Admin!"); // Success message for Admin
           navigate("/AdminDash");
         } else {
           setIsAdmin(false);
+          toast.success("Welcome!"); // Success message for regular user
           navigate("/Home");
         }
       } else {
         setIsAdmin(false);
+        toast.success("Welcome!"); // Default success message
         navigate("/Home");
       }
-      setEmail("");
-      setPassword("");
-      resetForm("");
     } catch (error) {
-      setError(error.message);
+      toast.error(error.message); // Show error message
     } finally {
       setLoading(false);
     }
@@ -135,11 +113,11 @@ function SignIn({ onClose, open }) {
           createdAt: new Date(),
         });
       }
-
+      toast.success("Successfully signed in with Google!");
       navigate("/Home"); // Navigate after successful login
     } catch (error) {
       console.error("Google Sign-In Error:", error);
-
+      toast.error("Google sign-in failed: " + error.message); // Error handling for Google sign-in
       // User-Friendly Error Messages
       switch (error.code) {
         case "auth/network-request-failed":
@@ -190,108 +168,58 @@ function SignIn({ onClose, open }) {
     }
   };
 
-  // const handleDialogSubmit = async () => {
-  //   try {
-  //     const user = auth.currentUser;
-  //     if (user) {
-  //       await updateDoc(doc(db, "users", user.uid), {
-  //         firstName,
-  //         lastName,
-  //         phoneNumber,
-  //       });
-  //       setOpenDialog(false);
-  //       alert("Profile Updated Successfully");
-  //       navigate("/Home"); // Ensure that `navigate` is used correctly
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //     alert("Failed to update profile: " + error.message);
-  //   }
-  // };
-
-  const resetForm = () => {
-    setEmail("");
-    setPassword("");
-    // setFirstName("");
-    // setLastName("");
-    // setPhoneNumber("");
-  };
-
   return (
-    <div className={`modal ${open ? "open" : ""}`}>
-      <div className="signup-container">
-        <div className="logo"></div>
-        <div className="signup-form">
-          <div className="header">
-            <h1 className="title">Sign In</h1>
-          </div>
-          {/* <div className="input-field">
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="First Name"
-              className="input"
-            />
-          </div>
-          <div className="input-field">
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Last Name"
-              className="input"
-            />
-          </div>
-          <div className="input-field">
-            <input
-              type="text"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Phone Number"
-              className="input"
-            />
-          </div> */}
-          <div className="input-field">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="input"
-            />
-          </div>
-          <div className="input-field">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="input"
-            />
-          </div>
-          <div className="button-field">
-            <button onClick={signIn} className="btn" disabled={loading}>
-              {loading ? "Signing in..." : "Login"}
-            </button>
-          </div>
-          <div className="button-field">
-            <button
-              onClick={signInWithGoogle}
-              className="btn google-btn"
-              disabled={loading}
-            >
-              {loading ? "Signing in..." : "Sign In with Google"}
-            </button>
-          </div>
-          <div className="login-link">
-            <h2>
-              Already have an account? <Link to={"/SignUp"}>Sign Up</Link>
-            </h2>
+    <>
+      <Toaster position="top-center" reverseOrder={false} />
+      <div className={`modal ${open ? "open" : ""}`}>
+        <div className="signup-container">
+          <div className="logo"></div>
+          <div className="signup-form">
+            <div className="header">
+              <h1 className="title">Sign In</h1>
+            </div>
+
+            <div className="input-field">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="input"
+              />
+            </div>
+            <div className="input-field">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="input"
+              />
+            </div>
+            <div className="button-field">
+              <button onClick={signIn} className="btn" disabled={loading}>
+                {loading ? "Signing in..." : "Login"}
+              </button>
+            </div>
+            <div className="button-field">
+              <button
+                onClick={signInWithGoogle}
+                className="btn google-btn"
+                disabled={loading}
+              >
+                {loading ? "Signing in..." : "Sign In with Google"}
+              </button>
+            </div>
+            <div className="login-link">
+              <h2>
+                Already have an account? <Link to={"/SignUp"}>Sign Up</Link>
+              </h2>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

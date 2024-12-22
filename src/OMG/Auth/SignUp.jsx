@@ -12,6 +12,7 @@ import { firebaseApp } from "../db/Firebase";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import UserContext from "./UserContext";
 import "./SignUp.css";
+import toast, { Toaster } from "react-hot-toast";
 
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
@@ -50,9 +51,11 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
 
           setUser(user); // Set user in the context
           onClose && onClose(); // Close the modal
+          toast.success("Sign up successfully");
           navigate("/Home");
         }
       } catch (error) {
+        toast.error(error.message);
         setError("Failed to process Google Sign-In redirect.");
       }
     };
@@ -61,7 +64,7 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
 
   const signup = async () => {
     if (!email || !password || !firstName || !lastName || !phoneNumber) {
-      return alert("Please fill all fields");
+      toast.error("Please fill all fields");
     }
     setLoading(true);
     try {
@@ -86,7 +89,7 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
       });
 
       setUser(user); // Set user in the context
-      alert("Signup Successful");
+      toast.success("Signup Successful");
       resetForm();
       if (onSignUpSuccess) {
         onSignUpSuccess();
@@ -95,6 +98,7 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
       }
     } catch (error) {
       handleAuthError(error);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -167,81 +171,84 @@ function SignUp({ onClose, open, onSignUpSuccess }) {
   };
 
   return (
-    <div className={`modal ${open ? "open" : ""}`}>
-      <div className="signup-container">
-        <div className="logo"></div>
-        <div className="signup-form">
-          <div className="header">
-            <h1 className="title">Signup</h1>
-            <div className="error-message">{error && <p>{error}</p>}</div>
-          </div>
-          <div className="input-field">
-            <input
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="First Name"
-              className="input"
-            />
-          </div>
-          <div className="input-field">
-            <input
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Last Name"
-              className="input"
-            />
-          </div>
-          <div className="input-field">
-            <input
-              type="text"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Phone Number"
-              className="input"
-            />
-          </div>
-          <div className="input-field">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="input"
-            />
-          </div>
-          <div className="input-field">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="input"
-            />
-          </div>
-          <div className="button-field">
-            <button onClick={signup} className="btn" disabled={loading}>
-              {loading ? "Signing Up..." : "Signup"}
-            </button>
-          </div>
-          <div className="button-field">
-            <button
-              onClick={signInWithGoogle}
-              className="btn google-btn"
-              disabled={loading}
-            >
-              {loading ? "Loading..." : "Sign Up with Google"}
-            </button>
-          </div>
-          <div className="login-link">
-            <h2>
-              Already have an account? <Link to={"/SignIn"}>Sign In</Link>
-            </h2>
+    <>
+      <Toaster position="top-center" reverseOrder={false} />
+      <div className={`modal ${open ? "open" : ""}`}>
+        <div className="signup-container">
+          <div className="logo"></div>
+          <div className="signup-form">
+            <div className="header">
+              <h1 className="title">Signup</h1>
+              <div className="error-message">{error && <p>{error}</p>}</div>
+            </div>
+            <div className="input-field">
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="First Name"
+                className="input"
+              />
+            </div>
+            <div className="input-field">
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Last Name"
+                className="input"
+              />
+            </div>
+            <div className="input-field">
+              <input
+                type="text"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Phone Number"
+                className="input"
+              />
+            </div>
+            <div className="input-field">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                className="input"
+              />
+            </div>
+            <div className="input-field">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="input"
+              />
+            </div>
+            <div className="button-field">
+              <button onClick={signup} className="btn" disabled={loading}>
+                {loading ? "Signing Up..." : "Signup"}
+              </button>
+            </div>
+            <div className="button-field">
+              <button
+                onClick={signInWithGoogle}
+                className="btn google-btn"
+                disabled={loading}
+              >
+                {loading ? "Loading..." : "Sign Up with Google"}
+              </button>
+            </div>
+            <div className="login-link">
+              <h2>
+                Already have an account? <Link to={"/SignIn"}>Sign In</Link>
+              </h2>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

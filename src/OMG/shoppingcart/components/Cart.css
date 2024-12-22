@@ -1,7 +1,3 @@
-.overflow_hide {
-  overflow: hidden;
-}
-
 #cart {
   position: fixed;
   color: rgb(0, 0, 0); /* Visible text */

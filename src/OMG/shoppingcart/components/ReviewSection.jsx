@@ -164,7 +164,9 @@ const ReviewComponent = () => {
               <div className="review-data">
                 <p>
                   {review.firstName} {review.lastName}
-                  <p className="review-rating">{renderStars(review.rating)}</p>
+                  <div className="review-rating">
+                    {renderStars(review.rating)}
+                  </div>
                 </p>
                 <div className="review-info">
                   {review.photoUrl && (

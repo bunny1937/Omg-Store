@@ -71,6 +71,11 @@
   font-family: LTDemo;
   font-size: 1.2rem;
 }
+.error-message {
+  color: red;
+  font-size: 4px;
+}
+
 .details-accordion {
   border-top: 1px solid #c5c5c5;
   border-bottom: 1px solid #c5c5c5;
@@ -125,10 +130,12 @@
   font-size: 1.6rem;
   transition: all 0.3s ease;
   border: none;
-  margin-top: 1rem;
+  margin-top: 2rem;
   cursor: pointer;
 }
-
+.details-checkout {
+  margin-top: 1rem !important;
+}
 .btn1:hover,
 .details-checkout:hover {
   color: #1d2621;
@@ -147,7 +154,7 @@
   font-size: 1.8rem;
   transition: all 0.3s ease;
   border: none;
-  margin-top: 1rem;
+  margin-top: 2rem;
   cursor: pointer;
 }
 

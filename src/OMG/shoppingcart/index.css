@@ -57,8 +57,8 @@ svg {
 /*--====== Home / Products Section ======--*/
 /* Main container and grid setup */
 #home {
-  background-color: #ebeae4;
   padding: 2rem;
+  background-color: #ebebeb;
 }
 
 .home_content {
@@ -73,51 +73,16 @@ svg {
 
 /* Product Card Styles */
 .product_card {
-  background-color: #28361836;
+  background-color: #d4d1c9;
   color: black;
   overflow: hidden;
   height: auto;
   position: relative;
-
+  padding: 0.1rem;
   border-radius: 5px;
   width: auto;
   /* box-shadow: 6px 7px 30px 0px #5c5c5c; */
 }
-
-/* Favorite Button */
-/* .btn-fav {
-  position: absolute;
-  top: 0.3rem;
-  right: 0.3rem;
-  width: 2.7rem;
-  height: 2.7rem; 
-  background-color: white;
-  border-radius: 40%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-
-  cursor: pointer;
-  transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.btn-fav:hover {
-  transform: scale(1.05);
-  background-color: #f0f0f0;
-}
-
-.btn-fav.favourited {
-  background-color: #ff6b6b;
-}
-
-.fav-icon1 {
-  background-image: url(../shoppingcart/components/pages/photos/icon-heart.svg);
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 1.5rem;
-  height: 1.5rem;
-} */
 
 .product_card_img {
   width: 100%;
