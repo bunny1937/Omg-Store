@@ -171,8 +171,6 @@ const Details = () => {
   //   slidesToShow: 1,
   //   slidesToScroll: 1,
   // };
-  const notify = () => toast("rukjaaaaaa");
-
   return (
     <>
       <Toaster
@@ -287,7 +285,7 @@ const Details = () => {
                 </button>
               </div>
               <button type="button" className="details-checkout">
-                <Link to={"/Checkout"}>Checkout</Link>
+                <Link to={"/Checkoutold"}>Checkout</Link>
               </button>
             </div>
             <div className="description-box">
@@ -347,8 +345,6 @@ const Details = () => {
         </div>
         {popupOpen && (
           <>
-            {console.log("Popup is rendering...")}{" "}
-            {/* Debugging Popup Render */}
             <SignInSignUpPopup
               onClose={() => setPopupOpen(false)}
               signIn={SignIn}

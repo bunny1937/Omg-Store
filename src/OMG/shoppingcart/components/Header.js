@@ -156,27 +156,43 @@ const Header = () => {
         <span style={{ color: "white" }}>
           <ul className={click ? "nav-menu active" : "nav-menu"}>
             <div className="header-links">
-              <Link to={"/Home"} className="all-products">
+              <Link
+                to={"/Home"}
+                className="all-products"
+                onClick={closeMobileMenu}
+              >
                 <p>All Products</p>
               </Link>
             </div>
             <div className="header-links">
-              <Link to="/category/Oversize" className="dropdown-link">
-                Oversize
+              <Link
+                to="/category/Oversize"
+                className="dropdown-link"
+                onClick={closeMobileMenu}
+              >
+                <p>Oversize</p>
               </Link>
             </div>
             <div className="header-links">
-              <Link to="/category/Hoodies" className="dropdown-link">
-                Hoodie
+              <Link
+                to="/category/Hoodies"
+                className="dropdown-link"
+                onClick={closeMobileMenu}
+              >
+                <p> Hoodie</p>
               </Link>
             </div>
             <div className="header-links">
-              <Link to={"/Support"} className="navbar-links">
+              <Link
+                to={"/Support"}
+                className="navbar-links"
+                onClick={closeMobileMenu}
+              >
                 <p> Contact</p>
               </Link>
             </div>
             <div className="header-links">
-              <Link to={"/Favourites"}>
+              <Link to={"/Favourites"} onClick={closeMobileMenu}>
                 <p className="favourites-text">Favourites</p>
               </Link>
             </div>

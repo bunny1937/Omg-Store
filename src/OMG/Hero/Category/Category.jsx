@@ -20,6 +20,12 @@ const Category = () => {
     Tshirts: [],
     Oversize: [],
   });
+  // Track touch and scroll position
+  const touchRef = useRef({
+    startX: 0,
+    scrollLeft: 0,
+    isScrolling: false,
+  });
 
   const navigate = useNavigate();
   const firestore = getFirestore(firebaseApp);
@@ -67,27 +73,49 @@ const Category = () => {
   };
 
   const handleTouchStart = (e, category) => {
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX - sliderRefs[category].current.offsetLeft);
-    setScrollLeft(sliderRefs[category].current.scrollLeft);
+    const touch = e.touches[0];
+    touchRef.current = {
+      startX: touch.clientX,
+      scrollLeft: sliderRefs[category].current.scrollLeft,
+      isScrolling: true,
+    };
   };
 
   const handleTouchMove = (e, category) => {
-    if (!isDragging) return;
-    const x = e.touches[0].pageX - sliderRefs[category].current.offsetLeft;
-    const scroll = scrollLeft - (x - startX);
-    sliderRefs[category].current.scrollLeft = scroll;
+    if (!touchRef.current.isScrolling) return;
+
+    e.preventDefault();
+    const touch = e.touches[0];
+    const delta = touchRef.current.startX - touch.clientX;
+
+    // Use requestAnimationFrame for smooth scrolling
+    requestAnimationFrame(() => {
+      if (sliderRefs[category].current) {
+        sliderRefs[category].current.scrollLeft =
+          touchRef.current.scrollLeft + delta;
+      }
+    });
+  };
+
+  const handleTouchEnd = () => {
+    touchRef.current.isScrolling = false;
   };
 
   const handleScroll = (category, direction) => {
     const container = sliderRefs[category].current;
+    if (!container) return;
+
     const scrollAmount = container.clientWidth * 0.8;
-    container.scrollBy({
-      left: direction === "right" ? scrollAmount : -scrollAmount,
+    const targetScroll =
+      container.scrollLeft +
+      (direction === "right" ? scrollAmount : -scrollAmount);
+
+    // Smooth scroll with native behavior
+    container.scrollTo({
+      left: targetScroll,
       behavior: "smooth",
     });
   };
-
   const handleSeeAll = (category) => {
     navigate(`/category/${category}`);
   };
@@ -116,6 +144,7 @@ const Category = () => {
           <button
             className="scroll-button scroll-button-left"
             onClick={() => handleScroll(category, "left")}
+            aria-label="Scroll left"
           >
             {"<"}
           </button>
@@ -125,10 +154,10 @@ const Category = () => {
             onMouseDown={(e) => handleMouseDown(e, category)}
             onMouseMove={(e) => handleMouseMove(e, category)}
             onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
             onTouchStart={(e) => handleTouchStart(e, category)}
             onTouchMove={(e) => handleTouchMove(e, category)}
-            onTouchEnd={handleMouseUp}
+            onTouchEnd={handleTouchEnd}
           >
             {products[category].map((product) => (
               <div
@@ -148,12 +177,15 @@ const Category = () => {
                         }
                         alt={product.Name || "Product Image"}
                         className="category-image"
+                        loading="lazy"
                       />
                     )}
                   </div>
                   <div className="category-info">
                     <h3 className="product-name">{product.Name}</h3>
-                    <p className="product-price">${product.price.toFixed(2)}</p>
+                    <p className="product-price">
+                      ₹ {product.price.toFixed(2)}
+                    </p>
                   </div>
                 </Link>
               </div>
@@ -162,6 +194,7 @@ const Category = () => {
           <button
             className="scroll-button scroll-button-right"
             onClick={() => handleScroll(category, "right")}
+            aria-label="Scroll right"
           >
             {">"}
           </button>

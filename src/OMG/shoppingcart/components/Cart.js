@@ -5,6 +5,7 @@ import cartContext from "../context/cartContext";
 import { collection, getDocs } from "firebase/firestore";
 import { firestore, auth } from "../../db/Firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import toast from "react-hot-toast";
 import "./Cart.css";
 
 const Cart = () => {
@@ -53,6 +54,7 @@ const Cart = () => {
         dispatch({ type: "SET_CART_ITEMS", payload: items });
       } catch (error) {
         console.error("Error fetching cart items:", error);
+        toast.error(error.message);
       } finally {
         setIsLoading(false); // Stop loading
       }
@@ -70,24 +72,24 @@ const Cart = () => {
   }, [dispatch, cartItems.length]);
 
   // Handle disabling body scroll when cart is open
-  useEffect(() => {
-    document.body.classList.toggle("overflow_hide", isCartOpen);
-  }, [isCartOpen]);
+  // useEffect(() => {
+  //   document.body.classList.toggle("overflow_hide", isCartOpen);
+  // }, [isCartOpen]);
 
-  // Handle clicking outside to close cart
-  useEffect(() => {
-    const outsideClose = (e) => {
-      if (e.target.id === "cart") {
-        toggleCart(false);
-      }
-    };
+  // // Handle clicking outside to close cart
+  // useEffect(() => {
+  //   const outsideClose = (e) => {
+  //     if (e.target.id === "cart") {
+  //       toggleCart(false);
+  //     }
+  //   };
 
-    window.addEventListener("click", outsideClose);
+  //   window.addEventListener("click", outsideClose);
 
-    return () => {
-      window.removeEventListener("click", outsideClose);
-    };
-  }, [toggleCart]);
+  //   return () => {
+  //     window.removeEventListener("click", outsideClose);
+  //   };
+  // }, [toggleCart]);
 
   const cartQuantity = cartItems ? cartItems.length : 0;
   const cartTotal = cartItems

@@ -137,7 +137,6 @@
 .quantity-controls {
   display: flex;
   align-items: center;
-  margin-top: 10px;
 }
 
 .quantity-controls button {
@@ -448,6 +447,7 @@ button:focus {
   /* Adjust existing components for better mobile view */
   .cart-item {
     align-items: center;
+    margin-bottom: 1rem;
   }
 
   .address-overview {

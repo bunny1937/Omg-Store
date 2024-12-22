@@ -56,7 +56,7 @@
 .order-header-items {
   display: flex;
   flex-direction: column;
-  margin-top: -5.5rem;
+  justify-content: center;
 }
 .order-detail {
   background-color: rgb(169, 169, 169);
@@ -143,15 +143,24 @@
     width: 70%;
   }
 }
-@media (min-width: 300px) and (max-width: 599px) {
+@media (min-width: 400px) and (max-width: 599px) {
   .order-cart-box img {
     margin: 1.5rem 0;
     width: 6rem;
     height: 6rem;
   }
+  .order-cart-list {
+    width: 100%;
+  }
+
   .order-item-grid {
     width: 100%;
     align-content: flex-start;
     margin-top: 1rem;
+  }
+}
+@media (min-width: 200px) and (max-width: 400px) {
+  .order-cart-list {
+    width: 100%;
   }
 }

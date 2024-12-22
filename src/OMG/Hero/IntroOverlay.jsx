@@ -37,24 +37,6 @@ export default function IntroOverlay({ onAnimationEnd }) {
       >
         {words[index]}
       </motion.p>
-      <svg>
-        <motion.path
-          d="M0 0 L100% 0 L100% 100% Q50% 120% 0 100% Z"
-          animate={{
-            d: [
-              "M0 0 L100% 0 L100% 100% Q50% 120% 0 100% Z",
-              "M0 0 L100% 0 L100% 80% Q50% 110% 0 80% Z",
-              "M0 0 L100% 0 L100% 0 Q50% 0 0 0 Z",
-            ],
-            fill: ["#141516", "#1A1B1D", "#2B2C2D"], // Animate fill color change
-          }}
-          transition={{
-            duration: 2,
-            ease: [0.76, 0, 0.24, 1],
-            times: [0, 0.5, 1],
-          }}
-        />
-      </svg>
     </motion.div>
   );
 }
